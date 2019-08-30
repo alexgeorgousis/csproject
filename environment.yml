@@ -2,3 +2,5 @@ name: csproject
 dependencies:
 - python
 - pip
+- pip:
+  - minerl
