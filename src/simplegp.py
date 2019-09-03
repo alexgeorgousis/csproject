@@ -44,7 +44,34 @@ def batch_fitness(ps, solution):
 	"""
 
 	scores = [fitness(p, solution) for p in ps]
+
+	# Check for winner (error < winning_condition)
+	for i in range(len(scores)):
+		if scores[i] < 0.1:
+			print("We've got a winner")
+			print(ps[i])
+
 	return scores
+
+def select(population, fitness_scores):
+	"""
+	Selects a program from a population randomly, based on the fitness scores.
+	"""
+
+	probs = []     # probability of selection of each program
+	selected = []  # selected program
+
+	# Compute selection probabilities
+	for i in range(len(population)):
+		probs.append(random.random() / fitness_scores[i])
+
+	# Select program with higest probability
+	max_prob = max(probs)
+	for j in range(len(population)):
+		if probs[j] == max_prob:
+			selected = population[j]
+
+	return selected
 
 def eval(exp, x):
 	"""
@@ -112,5 +139,35 @@ def choose_rnd_element(set):
 
 
 random.seed(seed)
+
+# Generate initial population
 population = init(n)
-print("Fitness scores: " + str(batch_fitness(population, solution)))
+print("Initial population")
+print(population)
+print()
+
+# Compute fitness scores
+fitness_scores = batch_fitness(population, solution)
+print("Fitness scores")
+print(fitness_scores)
+print()
+
+# Select program for reproduction
+p_repr = select(population, fitness_scores)
+print("Program for reproduction")
+print(p_repr)
+print()
+
+# Reproduce selected program into next generation
+next_gen = [p_repr]
+print("Next generation (after reproduction)")
+print(next_gen)
+print()
+
+# Select program for mutation
+p_mutation = select(population, fitness_scores)
+print("Program for mutation")
+print(p_mutation)
+print()
+
+# Mutate selected program into next generation
