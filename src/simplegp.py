@@ -1,9 +1,10 @@
 """
-Objective: generate 1 valid program of depth 1 randomly using the Full method.
+Objective: create genetic programming algorithm to solve the equation x^2 + x + 1
 """
 
 # TODO: implement fitness function
 
+import numpy as np
 import random
 
 
@@ -12,7 +13,7 @@ tset = ['x', '-2', '-1', '0', '1', '2']
 
 n = 4
 depth = 2
-solution = []  # x^2 + x + 1
+solution = ['+', ['*', 'x', 'x'], ['+', 'x', 1]]  # x^2 + x + 1
 
 def init(n):
 	population = []
@@ -26,6 +27,15 @@ def fitness(p, solution):
 	"""
 	Computes the fitness of the program p against the solution.
 	"""
+
+	errors = []
+
+	for x in np.arange(-1, 1.1, 0.1):
+		p_out = eval(p, x)
+		s_out = eval(solution, x)
+		errors.append(abs(s_out - p_out))
+
+	return sum(errors)
 
 def eval(exp, x):
 	"""
@@ -94,4 +104,4 @@ def choose_rnd_element(set):
 
 population = init(n)
 print(population[0])
-print("Value: " + str(eval(population[0], -1.0)))
+print("Fitness score: " + str(fitness(population[0], solution)))
