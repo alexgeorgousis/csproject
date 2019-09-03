@@ -2,7 +2,7 @@
 Objective: create genetic programming algorithm to solve the equation x^2 + x + 1
 """
 
-# TODO: implement fitness function
+# TODO: 
 
 import numpy as np
 import random
@@ -11,6 +11,7 @@ import random
 fset = ['+', '-', '*']
 tset = ['x', '-2', '-1', '0', '1', '2']
 
+seed = 2
 n = 4
 depth = 2
 solution = ['+', ['*', 'x', 'x'], ['+', 'x', 1]]  # x^2 + x + 1
@@ -36,6 +37,14 @@ def fitness(p, solution):
 		errors.append(abs(s_out - p_out))
 
 	return sum(errors)
+
+def batch_fitness(ps, solution):
+	"""
+	Computes the fitness of a list of programs, ps, against the solution.
+	"""
+
+	scores = [fitness(p, solution) for p in ps]
+	return scores
 
 def eval(exp, x):
 	"""
@@ -102,6 +111,6 @@ def choose_rnd_element(set):
 	return set[index]
 
 
+random.seed(seed)
 population = init(n)
-print(population[0])
-print("Fitness score: " + str(fitness(population[0], solution)))
+print("Fitness scores: " + str(batch_fitness(population, solution)))
