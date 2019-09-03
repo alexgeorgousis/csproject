@@ -2,7 +2,7 @@
 Objective: create genetic programming algorithm to solve the equation x^2 + x + 1
 """
 
-# TODO: 
+# TODO: implement count(p, index) from pseudocode
 
 import numpy as np
 import random
@@ -72,6 +72,34 @@ def select(population, fitness_scores):
 			selected = population[j]
 
 	return selected
+
+def mutate(p):
+	"""
+	Mutates the node of a program p (tree-based mutation).
+	"""
+
+	# Assign a probability to each node of p
+	probs = []
+	assign_mutation_probs(p, probs)
+
+	# Select node with higest probability for mutation
+	selected_node_idx = probs.index(max(probs))
+
+	# Mutate node in p
+	
+	
+	return probs
+
+def assign_mutation_probs(node, probs):
+	"""
+	Recursively traverses a tree with a given node as the root,
+	and assigns a probability to each sub-node in the tree (including terminals).
+	"""
+
+	if isinstance(node, list):
+		for subnode_i in range(1, len(node)):
+			probs.append(random.random())
+			assign_mutation_probs(node[subnode_i], probs)
 
 def eval(exp, x):
 	"""
@@ -170,4 +198,14 @@ print("Program for mutation")
 print(p_mutation)
 print()
 
-# Mutate selected program into next generation
+# Mutate selected program 
+p_mutated = mutate(p_mutation)
+print("Mutated version of the program")
+print(p_mutated)
+print()
+
+# Add mutated program into next generation
+next_gen.append(p_mutated)
+print("Next generation (after mutation)")
+print(next_gen)
+print()
