@@ -11,9 +11,9 @@ import random
 fset = ['+', '-', '*']
 tset = ['x', '-2', '-1', '0', '1', '2']
 
-seed = 2
-n = 4
-depth = 2
+seed = 2   # random seed (to get consistent initial population)
+n = 4      # population size
+depth = 2  # program tree depth
 solution = ['+', ['*', 'x', 'x'], ['+', 'x', 1]]  # x^2 + x + 1
 
 def init(n):
