@@ -11,10 +11,10 @@ import random
 fset = ['+', '-', '*']
 tset = ['x', '-2', '-1', '0', '1', '2']
 
-seed = 2   # random seed (to get consistent initial population)
+seed = 4   # random seed (to get consistent initial population)
 n = 4      # population size
 depth = 2  # program tree depth
-solution = ['+', ['*', 'x', 'x'], ['+', 'x', 1]]  # x^2 + x + 1
+solution = ['+', ['*', 'x', 'x'], ['+', 'x', '1']]  # x^2 + x + 1
 
 def init(n):
 	population = []
@@ -85,10 +85,8 @@ def mutate(p):
 	# Select node with higest probability for mutation
 	selected_node_idx = probs.index(max(probs))
 
-	# Mutate node in p
-	
-	
-	return probs
+	# Mutate selected node in p
+	mutate_node(p, selected_node_idx)
 
 def assign_mutation_probs(node, probs):
 	"""
@@ -100,6 +98,28 @@ def assign_mutation_probs(node, probs):
 		for subnode_i in range(1, len(node)):
 			probs.append(random.random())
 			assign_mutation_probs(node[subnode_i], probs)
+
+def mutate_node(p, index):
+	"""
+	Replaces the node at the given index in a program p 
+	with a randomly generated node of the same depth.
+	"""
+
+	print("Index = " + str(index))
+
+	for idx in range(1, len(p)):
+		if index == 0:
+			if isinstance(p[idx], list):
+				p[idx] = gen_rnd_exp(fset, tset, 1)
+			elif p[idx] in tset:
+				p[idx] = gen_rnd_exp(fset, tset, 0)
+			return
+		else:
+			index -= 1
+			print("index - 1 = " + str(index))
+			if isinstance(p[idx], list):
+				index = mutate_node(p[idx], index)
+	return index
 
 def eval(exp, x):
 	"""
@@ -127,7 +147,6 @@ def eval(exp, x):
 
 	return value
 	
-# TODO: don't assume function arity
 def apply(func, arg1, arg2):
 	"""
 	Applies function func to arguments.
@@ -149,7 +168,6 @@ def gen_rnd_exp(fset, tset, max_depth):
 	exp = ""
 
 	if max_depth == 0:
-		
 		return choose_rnd_element(tset)
 
 	else:
@@ -199,13 +217,13 @@ print(p_mutation)
 print()
 
 # Mutate selected program 
-p_mutated = mutate(p_mutation)
+mutate(p_mutation)
 print("Mutated version of the program")
-print(p_mutated)
+print(p_mutation)
 print()
 
 # Add mutated program into next generation
-next_gen.append(p_mutated)
+next_gen.append(p_mutation)
 print("Next generation (after mutation)")
 print(next_gen)
 print()
