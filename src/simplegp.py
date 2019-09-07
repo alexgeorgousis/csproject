@@ -20,9 +20,9 @@ tset = ['x', '-2', '-1', '0', '1', '2']
 
 n = 4         # population size
 depth = 2     # initial program depth
-max_gen = 50   # max number of generations to run the experiment for
+max_gen = 1000   # max number of generations to run the experiment for
 solution = ['+', ['*', 'x', 'x'], ['+', 'x', '1']]  # x^2 + x + 1
-fitness_goal = 7.6
+fitness_goal = 7.69
 
 def init(n):
 	population = []
@@ -241,20 +241,20 @@ def choose_rnd_element(set):
 # Initialisation
 population = init(n)
 max_fitness_scores = []  # highest fitness from each generation
+avg_fitness_scores = []  # average fitness from each generation
 
 # Main loop
 for gen_counter in range(1, max_gen+1):
 
-	# Display individuals + fitness scores
+	# Compute fitness scores
 	fitness_scores = batch_fitness(population, solution)
-	avg_fitness = sum(fitness_scores)/len(fitness_scores)
-	max_fitness = max(fitness_scores)
-	max_fitness_scores.append(max_fitness)
+	max_fitness_scores.append(max(fitness_scores))
+	avg_fitness_scores.append(sum(fitness_scores)/len(fitness_scores))
 
+	# Display generation info
 	print("\nGeneration #" + str(gen_counter))
 	for idx in range(len(population)):
 		print(population[idx], fitness_scores[idx])
-	print("Avg: " + str(avg_fitness))
 	print()
 
 	# Check for winner
@@ -297,5 +297,9 @@ for gen_counter in range(1, max_gen+1):
 
 
 # Plot average fitness scores
-plt.plot(max_fitness_scores)
+gen_counts = [i+1 for i in range(len(max_fitness_scores))]
+plt.plot(gen_counts, max_fitness_scores, 'ro')
+plt.title('Max Fitness')
+plt.ylabel('highest fitness score')
+plt.xlabel('generation number')
 plt.show()
