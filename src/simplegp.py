@@ -2,16 +2,21 @@
 Objective: create genetic programming algorithm to solve the equation x^2 + x + 1
 """
 
-# TODO: implement count(p, index) from pseudocode
 
 import numpy as np
 import random
+import copy
 
 
 fset = ['+', '-', '*']
 tset = ['x', '-2', '-1', '0', '1', '2']
 
-seed = 4   # random seed (to get consistent initial population)
+# # Seeds
+# init_seed = 1      # initial population
+# repr_seed = 2       # reproduction
+# mutation_seed = 3   # mutation
+# crossover_seed = 4  # crossover
+
 n = 4      # population size
 depth = 2  # program tree depth
 solution = ['+', ['*', 'x', 'x'], ['+', 'x', '1']]  # x^2 + x + 1
@@ -65,11 +70,11 @@ def select(population, fitness_scores):
 	for i in range(len(population)):
 		probs.append(random.random() / fitness_scores[i])
 
-	# Select program with higest probability
+	# Select program with highest probability
 	max_prob = max(probs)
 	for j in range(len(population)):
 		if probs[j] == max_prob:
-			selected = population[j]
+			selected = copy.deepcopy(population[j])
 
 	return selected
 
@@ -78,48 +83,107 @@ def mutate(p):
 	Mutates the node of a program p (tree-based mutation).
 	"""
 
-	# Assign a probability to each node of p
-	probs = []
-	assign_mutation_probs(p, probs)
+	# Randomly select a mutation point on p (node index)
+	mutation_point = select_rnd_point(p)
 
-	# Select node with higest probability for mutation
-	selected_node_idx = probs.index(max(probs))
+	# Randomly mutate selected node in p
+	replace_node(p, mutation_point)
 
-	# Mutate selected node in p
-	mutate_node(p, selected_node_idx)
-
-def assign_mutation_probs(node, probs):
+def crossover(p1, p2):
 	"""
-	Recursively traverses a tree with a given node as the root,
-	and assigns a probability to each sub-node in the tree (including terminals).
+	Performs crossover on two programs (parents) and returns the resulting program.
+	"""
+
+	p3 = copy.deepcopy(p1)  # crossover result
+
+	# Select crossover points on the parents
+	p1_point = select_rnd_point(p1)
+	p2_point = select_rnd_point(p2)
+	print(p1_point, p2_point)
+
+	# Get node at selected point in parent 2
+	p2_node = None
+	get_node_at_point(p2, p2_point, p2_node)
+	print("P2 node:", p2_node)
+
+	print("\nResult\n", p3)
+	return p3
+
+def select_rnd_point(p):
+	"""
+	Randomly selects a node in p and returns its index.
+	"""
+
+	# Assign a probability to each node of p
+	node_probs = []
+	assign_node_probs(p, node_probs)
+
+	# Select node index with highest probability
+	return node_probs.index(max(node_probs))	
+
+def get_node_at_point(p, point, node):
+	"""
+	Finds the node at a point in a program and loads it into a given node.
+	"""
+
+	print(p)
+	print("Point =", point)
+	print(node)
+
+	idx = 1
+	while point > -1 and idx < len(p):
+		print("while(" + str(idx) + ")")
+		if point == 0:
+			node = copy.deepcopy(p[idx])
+			print(node)
+			point -= 1
+		else:
+			point -= 1
+			print("point - 1 =", point)
+			if isinstance(p[idx], list):
+				point = get_node_at_point(p[idx], point, node)
+
+	return point
+
+def assign_node_probs(node, probs):
+	"""
+	Assigns a random probability to all the sub-nodes of a node (including terminals).
 	"""
 
 	if isinstance(node, list):
 		for subnode_i in range(1, len(node)):
 			probs.append(random.random())
-			assign_mutation_probs(node[subnode_i], probs)
+			assign_node_probs(node[subnode_i], probs)
 
-def mutate_node(p, index):
+def replace_node(p, point, new_node=None):
 	"""
-	Replaces the node at the given index in a program p 
-	with a randomly generated node of the same depth.
+	Finds and replaces the node at a point in a program, 
+	either with a randomly generated node of the same depth or a given node.
 	"""
 
-	print("Index = " + str(index))
+	idx = 1
+	while point > -1 and idx < len(p):
+		if point == 0:
 
-	for idx in range(1, len(p)):
-		if index == 0:
-			if isinstance(p[idx], list):
-				p[idx] = gen_rnd_exp(fset, tset, 1)
-			elif p[idx] in tset:
-				p[idx] = gen_rnd_exp(fset, tset, 0)
-			return
+			# Randomly generate new node (used in mutation)
+			if new_node == None:
+				if isinstance(p[idx], list):
+					p[idx] = gen_rnd_exp(fset, tset, 1)
+				elif p[idx] in tset:
+					p[idx] = gen_rnd_exp(fset, tset, 0)
+			
+			# Replace with given node (used in crossover)
+			else:
+				p[idx] = new_node
+
+			point -= 1
+
 		else:
-			index -= 1
-			print("index - 1 = " + str(index))
+			point -= 1
 			if isinstance(p[idx], list):
-				index = mutate_node(p[idx], index)
-	return index
+				point = replace_node(p[idx], point, new_node)
+
+	return point
 
 def eval(exp, x):
 	"""
@@ -184,46 +248,71 @@ def choose_rnd_element(set):
 	return set[index]
 
 
-random.seed(seed)
+"""--- Initialisation ---"""
+# random.seed(init_seed)
 
 # Generate initial population
-population = init(n)
-print("Initial population")
-print(population)
-print()
+# population = init(n)
+# print("Initial population")
+# for p in population: print(p)
+# print()
 
 # Compute fitness scores
-fitness_scores = batch_fitness(population, solution)
-print("Fitness scores")
-print(fitness_scores)
-print()
+# fitness_scores = batch_fitness(population, solution)
+# print("Fitness scores")
+# for f in fitness_scores: print(f)
+# print()
+
+
+"""--- Reproduction ---"""
+# random.seed(repr_seed)
 
 # Select program for reproduction
-p_repr = select(population, fitness_scores)
-print("Program for reproduction")
-print(p_repr)
-print()
+# p_repr = select(population, fitness_scores)
+# print("Program for reproduction")
+# print(p_repr)
+# print()
 
 # Reproduce selected program into next generation
-next_gen = [p_repr]
-print("Next generation (after reproduction)")
-print(next_gen)
-print()
+# next_gen = [p_repr]
+# print("Next generation (after reproduction)")
+# for p_new in next_gen: print(p_new)
+# print()
+
+
+"""--- Mutation ---"""
+# random.seed(mutation_seed)
 
 # Select program for mutation
-p_mutation = select(population, fitness_scores)
-print("Program for mutation")
-print(p_mutation)
-print()
+# p_mutation = select(population, fitness_scores)
+# print("Program for mutation")
+# print(p_mutation)
+# print()
 
-# Mutate selected program 
-mutate(p_mutation)
-print("Mutated version of the program")
-print(p_mutation)
-print()
+# Mutate selected program
+# mutate(p_mutation)
+# print("Mutated version of the program")
+# print(p_mutation)
+# print()
 
 # Add mutated program into next generation
-next_gen.append(p_mutation)
-print("Next generation (after mutation)")
-print(next_gen)
-print()
+# next_gen.append(p_mutation)
+# print("Next generation (after mutation)")
+# for p_new in next_gen: print(p_new)
+# print()
+
+
+"""--- Crossover ---"""
+# random.seed(crossover_seed)
+
+# Select programs for crossover
+# p1_crossover = select(population, fitness_scores)
+# p2_crossover = select(population, fitness_scores)
+# print("Parents for crossover\n", p1_crossover, '\n', p2_crossover, '\n')
+
+# Perform crossover and add result to next generation
+# p_crossover = crossover(p1_crossover, p2_crossover)
+
+node = [1,2,3]
+get_node_at_point(['-', ['*', 'x', '0'], ['*', '0', '-2']], 0, node)
+print("Result:", node)
