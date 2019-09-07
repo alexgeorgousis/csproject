@@ -10,7 +10,7 @@ import copy
 
 
 fset = ['+', '-', '*']
-tset = ['x', '-2', '-1', '0', '1', '2']
+tset = ['x', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5' ]
 
 # # Seeds
 # init_seed = 1      # initial population
@@ -20,7 +20,7 @@ tset = ['x', '-2', '-1', '0', '1', '2']
 
 n = 4         # population size
 depth = 2     # initial program depth
-max_gen = 1000   # max number of generations to run the experiment for
+max_gen = 500   # max number of generations to run the experiment for
 solution = ['+', ['*', 'x', 'x'], ['+', 'x', '1']]  # x^2 + x + 1
 fitness_goal = 7.69
 
@@ -63,7 +63,8 @@ def select(population, fitness_scores):
 
 	# Compute selection probabilities
 	for i in range(len(population)):
-		probs.append(random.random() / fitness_scores[i])
+		probs.append((random.randrange(50, 100, 1)/100) / fitness_scores[i])
+		# probs.append(random.random() / fitness_scores[i])
 
 	# Select program with highest probability
 	max_prob = max(probs)
@@ -240,15 +241,15 @@ def choose_rnd_element(set):
 
 # Initialisation
 population = init(n)
-max_fitness_scores = []  # highest fitness from each generation
-avg_fitness_scores = []  # average fitness from each generation
+best_fitness_scores = []  # best fitness from each generation
+avg_fitness_scores = []   # average fitness from each generation
 
 # Main loop
 for gen_counter in range(1, max_gen+1):
 
 	# Compute fitness scores
 	fitness_scores = batch_fitness(population, solution)
-	max_fitness_scores.append(max(fitness_scores))
+	best_fitness_scores.append(min(fitness_scores))
 	avg_fitness_scores.append(sum(fitness_scores)/len(fitness_scores))
 
 	# Display generation info
@@ -297,9 +298,9 @@ for gen_counter in range(1, max_gen+1):
 
 
 # Plot average fitness scores
-gen_counts = [i+1 for i in range(len(max_fitness_scores))]
-plt.plot(gen_counts, max_fitness_scores, 'ro')
-plt.title('Max Fitness')
+gen_counts = [i+1 for i in range(len(best_fitness_scores))]
+plt.plot(gen_counts, best_fitness_scores, '-b')
+plt.title('Best Fitness')
 plt.ylabel('highest fitness score')
 plt.xlabel('generation number')
 plt.show()
