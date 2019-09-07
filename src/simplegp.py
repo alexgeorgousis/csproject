@@ -4,6 +4,7 @@ Objective: create genetic programming algorithm to solve the equation x^2 + x + 
 
 
 import numpy as np
+import matplotlib.pyplot as plt
 import random
 import copy
 
@@ -17,9 +18,11 @@ tset = ['x', '-2', '-1', '0', '1', '2']
 # mutation_seed = 3   # mutation
 # crossover_seed = 4  # crossover
 
-n = 4      # population size
-depth = 2  # program tree depth
+n = 4         # population size
+depth = 2     # initial program depth
+max_gen = 50   # max number of generations to run the experiment for
 solution = ['+', ['*', 'x', 'x'], ['+', 'x', '1']]  # x^2 + x + 1
+fitness_goal = 7.6
 
 def init(n):
 	population = []
@@ -48,15 +51,7 @@ def batch_fitness(ps, solution):
 	Computes the fitness of a list of programs, ps, against the solution.
 	"""
 
-	scores = [fitness(p, solution) for p in ps]
-
-	# Check for winner (error < winning_condition)
-	for i in range(len(scores)):
-		if scores[i] < 0.1:
-			print("We've got a winner")
-			print(ps[i])
-
-	return scores
+	return [fitness(p, solution) for p in ps]
 
 def select(population, fitness_scores):
 	"""
@@ -243,20 +238,40 @@ def choose_rnd_element(set):
 	return set[index]
 
 
-# Generate initial population
+# Initialisation
 population = init(n)
-print("Initial population")
-for p in population: print(p)
-print()
+max_fitness_scores = []  # highest fitness from each generation
 
-# Compute fitness scores
-fitness_scores = batch_fitness(population, solution)
-print("Fitness scores")
-for f in fitness_scores: print(f)
-print()
+# Main loop
+for gen_counter in range(1, max_gen+1):
 
+	# Display individuals + fitness scores
+	fitness_scores = batch_fitness(population, solution)
+	avg_fitness = sum(fitness_scores)/len(fitness_scores)
+	max_fitness = max(fitness_scores)
+	max_fitness_scores.append(max_fitness)
 
-for i in range(2):
+	print("\nGeneration #" + str(gen_counter))
+	for idx in range(len(population)):
+		print(population[idx], fitness_scores[idx])
+	print("Avg: " + str(avg_fitness))
+	print()
+
+	# Check for winner
+	idx = 0
+	winner_found = False
+	while not winner_found and idx < len(population):
+		if fitness_scores[idx] <= fitness_goal:
+			winner_found = True
+		else:
+			idx += 1
+
+	if winner_found:
+		print("Winner!")
+		print(population[idx])
+		print()
+		break
+
 	# Reproduction
 	p_repr = select(population, fitness_scores)
 
@@ -277,13 +292,10 @@ for i in range(2):
 
 
 	# Add programs to next generation
-	next_gen = [p_repr, p_mutation, p1_crossover, p2_crossover]
-	print("Next generation (1)")
-	for p in next_gen: print(p)
-	print()
+	population = [p_repr, p_mutation, p1_crossover, p2_crossover]
+	fitness_scores = batch_fitness(population, solution)
 
-	# Compute fitness scores
-	fitness_scores = batch_fitness(next_gen, solution)
-	print("Fitness scores")
-	for f in fitness_scores: print(f)
-	print()
+
+# Plot average fitness scores
+plt.plot(max_fitness_scores)
+plt.show()
