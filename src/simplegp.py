@@ -99,14 +99,14 @@ def crossover(p1, p2):
 	# Select crossover points on the parents
 	p1_point = select_rnd_point(p1)
 	p2_point = select_rnd_point(p2)
-	print(p1_point, p2_point)
 
 	# Get node at selected point in parent 2
-	p2_node = None
+	p2_node = []
 	get_node_at_point(p2, p2_point, p2_node)
-	print("P2 node:", p2_node)
 
-	print("\nResult\n", p3)
+	# Replace node in parent 1 with node in parent 2
+	replace_node(p3, p1_point, p2_node[0])
+
 	return p3
 
 def select_rnd_point(p):
@@ -126,23 +126,16 @@ def get_node_at_point(p, point, node):
 	Finds the node at a point in a program and loads it into a given node.
 	"""
 
-	print(p)
-	print("Point =", point)
-	print(node)
-
 	idx = 1
 	while point > -1 and idx < len(p):
-		print("while(" + str(idx) + ")")
 		if point == 0:
-			node = copy.deepcopy(p[idx])
-			print(node)
+			node.append(copy.deepcopy(p[idx]))
 			point -= 1
 		else:
 			point -= 1
-			print("point - 1 =", point)
 			if isinstance(p[idx], list):
 				point = get_node_at_point(p[idx], point, node)
-
+		idx += 1
 	return point
 
 def assign_node_probs(node, probs):
@@ -183,6 +176,8 @@ def replace_node(p, point, new_node=None):
 			if isinstance(p[idx], list):
 				point = replace_node(p[idx], point, new_node)
 
+		idx += 1
+
 	return point
 
 def eval(exp, x):
@@ -196,7 +191,7 @@ def eval(exp, x):
 	if isinstance(exp, list):
 		func = exp[0]
 
-		# TODO: don't assume function arity (num of arguments)
+		# TODO: don't assume function arity
 		arg1 = eval(exp[1], x)
 		arg2 = eval(exp[2], x)
 
@@ -248,71 +243,47 @@ def choose_rnd_element(set):
 	return set[index]
 
 
-"""--- Initialisation ---"""
-# random.seed(init_seed)
-
 # Generate initial population
-# population = init(n)
-# print("Initial population")
-# for p in population: print(p)
-# print()
+population = init(n)
+print("Initial population")
+for p in population: print(p)
+print()
 
 # Compute fitness scores
-# fitness_scores = batch_fitness(population, solution)
-# print("Fitness scores")
-# for f in fitness_scores: print(f)
-# print()
+fitness_scores = batch_fitness(population, solution)
+print("Fitness scores")
+for f in fitness_scores: print(f)
+print()
 
 
-"""--- Reproduction ---"""
-# random.seed(repr_seed)
-
-# Select program for reproduction
-# p_repr = select(population, fitness_scores)
-# print("Program for reproduction")
-# print(p_repr)
-# print()
-
-# Reproduce selected program into next generation
-# next_gen = [p_repr]
-# print("Next generation (after reproduction)")
-# for p_new in next_gen: print(p_new)
-# print()
+for i in range(2):
+	# Reproduction
+	p_repr = select(population, fitness_scores)
 
 
-"""--- Mutation ---"""
-# random.seed(mutation_seed)
-
-# Select program for mutation
-# p_mutation = select(population, fitness_scores)
-# print("Program for mutation")
-# print(p_mutation)
-# print()
-
-# Mutate selected program
-# mutate(p_mutation)
-# print("Mutated version of the program")
-# print(p_mutation)
-# print()
-
-# Add mutated program into next generation
-# next_gen.append(p_mutation)
-# print("Next generation (after mutation)")
-# for p_new in next_gen: print(p_new)
-# print()
+	# Mutation
+	p_mutation = select(population, fitness_scores)
+	mutate(p_mutation)
 
 
-"""--- Crossover ---"""
-# random.seed(crossover_seed)
+	# Crossover
+	p1 = select(population, fitness_scores)
+	p2 = select(population, fitness_scores)
+	p3 = select(population, fitness_scores)
+	p4 = select(population, fitness_scores)
 
-# Select programs for crossover
-# p1_crossover = select(population, fitness_scores)
-# p2_crossover = select(population, fitness_scores)
-# print("Parents for crossover\n", p1_crossover, '\n', p2_crossover, '\n')
+	p1_crossover = crossover(p1, p2)
+	p2_crossover = crossover(p3, p4)
 
-# Perform crossover and add result to next generation
-# p_crossover = crossover(p1_crossover, p2_crossover)
 
-node = [1,2,3]
-get_node_at_point(['-', ['*', 'x', '0'], ['*', '0', '-2']], 0, node)
-print("Result:", node)
+	# Add programs to next generation
+	next_gen = [p_repr, p_mutation, p1_crossover, p2_crossover]
+	print("Next generation (1)")
+	for p in next_gen: print(p)
+	print()
+
+	# Compute fitness scores
+	fitness_scores = batch_fitness(next_gen, solution)
+	print("Fitness scores")
+	for f in fitness_scores: print(f)
+	print()
