@@ -13,16 +13,86 @@ fset = ['+', '-', '*']
 tset = ['x', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5' ]
 
 # # Seeds
-# init_seed = 1      # initial population
+# init_seed = 1       # initial population
 # repr_seed = 2       # reproduction
 # mutation_seed = 3   # mutation
 # crossover_seed = 4  # crossover
 
-n = 4         # population size
-depth = 2     # initial program depth
-max_gen = 500   # max number of generations to run the experiment for
-solution = ['+', ['*', 'x', 'x'], ['+', 'x', '1']]  # x^2 + x + 1
+n = 4            # population size
+depth = 2        # initial program depth
+max_gen = 1000   # max number of generations to run the experiment for
 fitness_goal = 7.69
+solution = ['+', ['*', 'x', 'x'], ['+', 'x', '1']]  # x^2 + x + 1
+
+def run(n, depth, max_gen, fitness_goal, solution):
+	"""
+	Performs one run of the experiment, subject to the given parameters.
+
+	@n - population size
+	@depth - initial individual depth
+	@max_gen - maximum number of generations to run the experiment for
+	@solution - the function the algorithm is trying to find
+	@fitness_goal - stop the experiment when at least one individual achieves this score
+	"""
+
+	# Initialisation
+	population = init(n)
+	best_fitness_scores = []  # best fitness from each generation
+	avg_fitness_scores = []   # average fitness from each generation
+
+	# Main loop
+	for gen_counter in range(1, max_gen+1):
+
+		# Compute fitness scores
+		fitness_scores = batch_fitness(population, solution)
+		best_fitness_scores.append(min(fitness_scores))
+		avg_fitness_scores.append(sum(fitness_scores)/len(fitness_scores))
+
+		# Display generation info
+		print("\nGeneration #" + str(gen_counter))
+		for idx in range(len(population)):
+			print(population[idx], fitness_scores[idx])
+		print()
+
+		# Check for winner
+		idx = 0
+		winner_found = False
+		while not winner_found and idx < len(population):
+			if fitness_scores[idx] <= fitness_goal:
+				winner_found = True
+			else:
+				idx += 1
+
+		if winner_found:
+			print("Winner!")
+			print(population[idx])
+			print()
+			break
+
+		# Reproduction
+		p_repr = select(population, fitness_scores)
+
+
+		# Mutation
+		p_mutation = select(population, fitness_scores)
+		mutate(p_mutation)
+
+
+		# Crossover
+		p1 = select(population, fitness_scores)
+		p2 = select(population, fitness_scores)
+		p3 = select(population, fitness_scores)
+		p4 = select(population, fitness_scores)
+
+		p1_crossover = crossover(p1, p2)
+		p2_crossover = crossover(p3, p4)
+
+
+		# Add programs to next generation
+		population = [p_repr, p_mutation, p1_crossover, p2_crossover]
+		fitness_scores = batch_fitness(population, solution)
+
+	return (best_fitness_scores, avg_fitness_scores)
 
 def init(n):
 	population = []
@@ -239,65 +309,16 @@ def choose_rnd_element(set):
 	return set[index]
 
 
-# Initialisation
-population = init(n)
-best_fitness_scores = []  # best fitness from each generation
-avg_fitness_scores = []   # average fitness from each generation
-
-# Main loop
-for gen_counter in range(1, max_gen+1):
-
-	# Compute fitness scores
-	fitness_scores = batch_fitness(population, solution)
-	best_fitness_scores.append(min(fitness_scores))
-	avg_fitness_scores.append(sum(fitness_scores)/len(fitness_scores))
-
-	# Display generation info
-	print("\nGeneration #" + str(gen_counter))
-	for idx in range(len(population)):
-		print(population[idx], fitness_scores[idx])
-	print()
-
-	# Check for winner
-	idx = 0
-	winner_found = False
-	while not winner_found and idx < len(population):
-		if fitness_scores[idx] <= fitness_goal:
-			winner_found = True
-		else:
-			idx += 1
-
-	if winner_found:
-		print("Winner!")
-		print(population[idx])
-		print()
-		break
-
-	# Reproduction
-	p_repr = select(population, fitness_scores)
 
 
-	# Mutation
-	p_mutation = select(population, fitness_scores)
-	mutate(p_mutation)
+# Run the epxeriment
+best_fitness_scores, avg_fitness_scores = run(n, depth, max_gen, fitness_goal, solution)
 
+# Output fitness statistics
+print("Best performance: " + str(min(best_fitness_scores)))
+print("Worst performance: " + str(max(best_fitness_scores)))
 
-	# Crossover
-	p1 = select(population, fitness_scores)
-	p2 = select(population, fitness_scores)
-	p3 = select(population, fitness_scores)
-	p4 = select(population, fitness_scores)
-
-	p1_crossover = crossover(p1, p2)
-	p2_crossover = crossover(p3, p4)
-
-
-	# Add programs to next generation
-	population = [p_repr, p_mutation, p1_crossover, p2_crossover]
-	fitness_scores = batch_fitness(population, solution)
-
-
-# Plot average fitness scores
+# Plot fitness scores
 gen_counts = [i+1 for i in range(len(best_fitness_scores))]
 plt.plot(gen_counts, best_fitness_scores, '-b')
 plt.title('Best Fitness')
