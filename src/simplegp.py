@@ -20,11 +20,11 @@ tset = ['x'] + list(np.round(np.arange(-5.0, 5.1, 1), 4))
 
 n = 10           # population size
 depth = 2         # initial program depth
-max_gen = 100   # max number of generations to run the experiment for
+max_gen = 600   # max number of generations to run the experiment for
 fitness_goal = 0.1
 solution = ['+', ['*', 'x', 'x'], ['+', 'x', '1']]  # x^2 + x + 1
 
-# Genetic operations parameters (how many individuals each generates)
+# Genetic operation rates
 crossover_rate = 8
 reproduction_rate = 1
 mutation_rate = 1
@@ -323,10 +323,6 @@ def interpret(expression):
 
 
 
-#TESTING
-# print(interpret(['+', ['*', '1', '2'], ['-', ['+', '3', '4'], '5']]))
-#/TESTING
-
 
 # Run the epxeriment
 best_fitness_scores, avg_fitness_scores, best_individuals = run(
@@ -345,9 +341,10 @@ print()
 print("Best performance: " + str(min(best_fitness_scores)))
 print("Average performance: " + str(sum(avg_fitness_scores) / len(avg_fitness_scores)))
 
-# Display best individuals of each generation
-for i in best_individuals:
-	print(interpret(i))
+# Display best individuals of latest generations
+num_display = 10
+for idx, val in enumerate(best_individuals[-num_display:]):
+	print("\nGeneration {:d} \n {:s}".format((idx + max_gen-num_display + 1), interpret(val)))
 
 # Plot best fitness
 gen_counts = [i+1 for i in range(len(best_fitness_scores))]
@@ -361,4 +358,4 @@ plt.plot(gen_counts, avg_fitness_scores, '-b')
 plt.title('Best/Average Fitness')
 plt.ylabel('fitness score')
 plt.xlabel('generation number')
-plt.show()
+# plt.show()
