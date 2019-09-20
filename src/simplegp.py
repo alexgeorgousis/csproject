@@ -84,7 +84,6 @@ def run(n, depth, max_gen, fitness_goal, solution, repr_rate, cross_rate, mutati
 					 [crossover(select(population, fitness_scores), select(population, fitness_scores)) for _ in range(cross_rate)]
 
 	return (best_fitness_scores, avg_fitness_scores, best_individuals)
->>>>>>> e05f3f23fb7bc0aed66196160745636363c485e4
 
 def init(n):
 	"""
@@ -358,4 +357,4 @@ plt.plot(gen_counts, avg_fitness_scores, '-b')
 plt.title('Best/Average Fitness')
 plt.ylabel('fitness score')
 plt.xlabel('generation number')
-# plt.show()
+plt.show()
