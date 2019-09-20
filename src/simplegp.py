@@ -12,19 +12,18 @@ import copy
 fset = ['+', '-', '*']
 tset = ['x', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5' ]
 
-# # Seeds
-# init_seed = 1      # initial population
-# repr_seed = 2       # reproduction
-# mutation_seed = 3   # mutation
-# crossover_seed = 4  # crossover
-
 n = 4         # population size
 depth = 2     # initial program depth
 max_gen = 500   # max number of generations to run the experiment for
 solution = ['+', ['*', 'x', 'x'], ['+', 'x', '1']]  # x^2 + x + 1
-fitness_goal = 7.69
+fitness_goal = 0.1
 
 def init(n):
+	"""
+	Creates an initial random population of the given depth,
+	using the given function and terminal sets
+	"""
+
 	population = []
 
 	for i in range(n):
