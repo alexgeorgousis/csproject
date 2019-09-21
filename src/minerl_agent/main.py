@@ -1,24 +1,27 @@
 import gym, minerl, logging
+import numpy as np
 import matplotlib.pyplot as plt
-logging.basicConfig(level=logging.DEBUG)
+from minerlgp import MineRLGP
+# logging.basicConfig(level=logging.DEBUG)
 
+# GP setup
+gp = MineRLGP(pop_size=5)
+
+# Environment setup
 env = gym.make('MineRLNavigateDense-v0')
 
+# Episode setup
 obs = env.reset()
 done = False
-
 compass_angle_measures = []
 net_reward = 0
 net_reward_measures = [0]
 
+# Episode main loop
 while not done:
 	env.render()
 
 	action = env.action_space.noop()
-	action['camera'] = [0, 0.03 * obs['compassAngle']]
-	action['forward'] = 1
-	action['jump'] = 1
-	action['attack'] = 1
 	
 	obs, reward, done, info = env.step(action)
 
@@ -26,6 +29,8 @@ while not done:
 	compass_angle_measures.append(obs['compassAngle'])
 	net_reward += reward
 	net_reward_measures.append(net_reward)
+
+env.close()
 
 
 # Plot compass angle over time
