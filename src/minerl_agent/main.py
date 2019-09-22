@@ -4,9 +4,6 @@ import matplotlib.pyplot as plt
 from minerlgp import MineRLGP
 # logging.basicConfig(level=logging.DEBUG)
 
-# GP setup
-gp = MineRLGP(pop_size=5)
-
 # Environment setup
 env = gym.make('MineRLNavigateDense-v0')
 
