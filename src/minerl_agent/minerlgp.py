@@ -1,8 +1,8 @@
 import numpy as np
 import gym, minerl
 
-# import logging
-# logging.basicConfig(level=logging.DEBUG)
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 
 class MineRLGP:
@@ -18,14 +18,14 @@ class MineRLGP:
 
 	# Function and terminal sets
 	_fset = []
-	_tset = ['', 'forward']
+	_tset = ['forward', 'back', 'left', 'right']
 
-	_init_pop = []  # initial population
+	init_pop = []  # initial population
 
 	# Environment parameters
 	_env_name = ""             # name of MineRL environment
-	_env = None                # MineRL environment instance
-	_max_episode_steps = 2000  # Maximum number of timesteps before episode termination
+	env = None                # MineRL environment instance
+	_max_episode_steps = 200   # Maximum number of timesteps before episode termination
 
 	def __init__(self, pop_size=4, env="MineRLNavigateDense-v0"):
 		"""
@@ -37,41 +37,56 @@ class MineRLGP:
 		
 		# Initial GP population
 		for _ in range(self._pop_size):
-			self._init_pop.append([np.random.choice(self._tset)])
+			self.init_pop.append([np.random.choice(self._tset)])
 
 		# MineRL parameters
 		self._env_name = env
-		self._env = gym.make(self._env_name)
-		self._env._max_episode_steps = self._max_episode_steps
+		self.env = gym.make(self._env_name)
+		self.env._max_episode_steps = self._max_episode_steps
 
-	def fitness (self, indiv):
-		"""Evaluates the fitness of an individual"""
+	def fitness (self, pop):
+		"""Evaluates the fitness of each individual in a population"""
 
-		# Episode setup
-		obs = self._env.reset()
-		done = False
-		net_reward = 0
+		rewards = []
 
-		# Episode main loop
-		while not done:
-			self._env.render()
+		for i in pop:
 
-			action = self._eval(indiv)
-			
-			obs, reward, done, info = self._env.step(action)
+			# Episode setup
+			obs = self.env.reset()
+			done = False
+			net_reward = 0
 
-			# Save measurements
-			net_reward += reward
+			# Episode main loop
+			while not done:
+				self.env.render()
 
-		print("Net Reward: " + str(net_reward))
+				action = self._eval(i, obs)
+				
+				obs, reward, done, info = self.env.step(action)
 
-	def _eval(indiv):
-		"""Evaluates an individual to extract an action."""
+				net_reward += reward
 
+			# Store individual net reward
+			rewards.append(net_reward)
+
+		return rewards
+
+	def _eval(self, indiv, obs):
+		"""Evaluates an individual to extract an action, given an observation."""
+
+		action = self.env.action_space.noop()
+		action[indiv[0]] = 1
+
+		return action
 
 
 
 # TESTING #
-gp = MineRLGP(pop_size=1)
-gp.fitness(gp._init_pop[0])
-gp._env.close()
+gp = MineRLGP(pop_size=4)
+fitness_scores = gp.fitness(gp.init_pop)
+gp.env.close()
+
+print('\n')
+print(gp.init_pop)
+print(fitness_scores)
+print()
