@@ -54,6 +54,7 @@ class MineRLGP:
 			# Episode setup
 			obs = self.env.reset()
 			done = False
+			reward = 0
 			net_reward = 0
 
 			# Episode main loop
