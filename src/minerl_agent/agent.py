@@ -2,55 +2,68 @@ import gym
 import minerl
 import matplotlib.pyplot as plt
 
+# Experiment parameters
+max_time_steps = 1000
+num_episodes = 1
+seed = 1015
+
 env = gym.make("MineRLNavigateDense-v0")
-obs = env.reset()
 
-done = False
-net_reward = 0
-reward_measues = []
-compass_measures = []
+for ep in range(num_episodes):
 
-for time_step in range(1000):
-	_ = env.render()
-
+	done = False
+	net_reward = 0
 	action = env.action_space.noop()
+	reward_measues = []
+	compass_measures = []
 
-	# Keep turning towards goal
-	action['camera'] = [0, 0.03*obs['compassAngle']]
-	
-	# Wait 100 timesteps for the compass to adjust
-	if time_step > 100:
+	close_to_goal = False
+	angle_threshold = 150  # indicates that the agent just passed by the goal
+	init_adjust_done = False
+	adjust_period = 100    # compass angle adjustment period
 
-		# Stop when compass angle overshoots (passed goal)
-		if abs(obs['compassAngle']) > 150:
-			for i in range(time_step, 1000):
-				_ = env.render()
+	env.seed(seed)
+	obs = env.reset()
 
-				action['jump'] = 0
+	for time_step in range(max_time_steps):
+		_ = env.render()
+
+		# Keep turning towards goal
+		action['camera'] = [0, 0.03*obs['compassAngle']]
+		
+		# Check if initial adjustment is done
+		if time_step > adjust_period:
+			init_adjust_done = True
+
+		# Initial adjustment is done
+		if init_adjust_done:
+			
+			# Check if agent is close to goal
+			if obs['compassAngle'] > angle_threshold:
+				close_to_goal = True
+
+			# Agent isn't close to goal
+			if not close_to_goal:
+				action['forward'] = 1
+				action['jump'] = 1
+
+			# Agent is close to goal
+			else:
 				action['forward'] = 0
+				action['jump'] = 0
 
-				obs, reward, done, info = env.step(action)
-				net_reward += reward
-				reward_measues.append(reward)
-				compass_measures.append(obs['compassAngle'])
+		# Take action, record measurements, check for termination
+		obs, reward, done, info = env.step(action)
+		net_reward += reward
+		reward_measues.append(net_reward)
+		compass_measures.append(obs['compassAngle'])
 
-				if done:
-					break
+		if done:
 			break
 
-		# Keep running and jumping towards goal
-		else:
-			action['jump'] = 1
-			action['forward'] = 1
+env.close()
 
-	obs, reward, done, info = env.step(action)
 
-	net_reward += reward
-	reward_measues.append(reward)
-	compass_measures.append(obs['compassAngle'])
-
-	if done:
-		break
 
 print("Net reward: " + str((net_reward)))
 
