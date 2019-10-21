@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 # Experiment parameters
 max_time_steps = 6000
 num_episodes = 1
-seed = 1016
+good_seeds = [1013, 1015, 1016]
+seed = good_seeds[0]
 
 env = gym.make("MineRLNavigateDense-v0")
 
@@ -28,25 +29,31 @@ for ep in range(num_episodes):
 	# Search grid representation
 	search_actions = []
 	search_counter = 0
+	init_grid_size = 3
+	grid_size_increment = 2
+	max_grid_size = 300
 
-	for i in range(3, 300, 2):
-		search_actions.append({'forward': 1})
+	# Action to take on every point on the grid
+	search_action = {'forward': 1, 'jump': 1}
+
+	for i in range(init_grid_size, max_grid_size, grid_size_increment):
+		search_actions.append(search_action)
 		search_actions.append({'camera': [0, -90]})
 
 		for _ in range(i-2):
-			search_actions.append({'forward': 1})
+			search_actions.append(search_action)
 		search_actions.append({'camera': [0, -90]})
 
 		for _ in range(i-1):
-			search_actions.append({'forward': 1})
+			search_actions.append(search_action)
 		search_actions.append({'camera': [0, -90]})
 
 		for _ in range(i-1):
-			search_actions.append({'forward': 1})
+			search_actions.append(search_action)
 		search_actions.append({'camera': [0, -90]})
 
 		for _ in range(i-1):
-			search_actions.append({'forward': 1})
+			search_actions.append(search_action)
 
 	print_msg = True        # used to stop printing console messages
 	angle_threshold = 150   # indicates that the agent just passed by the goal
@@ -58,8 +65,6 @@ for ep in range(num_episodes):
 	obs = env.reset()
 
 	for time_step in range(max_time_steps):
-		print(time_step)
-
 		_ = env.render()
 
 		# Wait until the compass has adjusted
@@ -71,7 +76,7 @@ for ep in range(num_episodes):
 			action = env.action_space.noop()
 			adjusting = time_counter < adjust_period
 
-		# Stage 1
+		# Stage 1: turn towards goal
 		if init_stage and not adjusting:
 			
 			if print_msg:
@@ -150,14 +155,14 @@ for ep in range(num_episodes):
 				print("Stage 5: searching...")
 				print_msg = False
 
-			adjust_period = 5
+			adjust_period = 12
 			action = env.action_space.noop()
 
 			if time_counter > adjust_period:
 				action = search_actions[search_counter]
-				action['jump'] = 1
 				time_counter = 0
 
+				# Move search counter to next action on the grid
 				if search_counter + 1 < len(search_actions):
 					search_counter += 1
 				else:
