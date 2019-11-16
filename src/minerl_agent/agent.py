@@ -1,10 +1,11 @@
 import gym
 import minerl
 import matplotlib.pyplot as plt
+from search_grid import *
 
 # Experiment parameters
-max_time_steps = 6000
-num_episodes = 1
+max_time_steps = 3000
+num_episodes = 10
 good_seeds = [1013, 1015, 1016]
 seed = good_seeds[0]
 
@@ -33,27 +34,8 @@ for ep in range(num_episodes):
 	grid_size_increment = 2
 	max_grid_size = 300
 
-	# Action to take on every point on the grid
-	search_action = {'forward': 1, 'jump': 1}
-
-	for i in range(init_grid_size, max_grid_size, grid_size_increment):
-		search_actions.append(search_action)
-		search_actions.append({'camera': [0, -90]})
-
-		for _ in range(i-2):
-			search_actions.append(search_action)
-		search_actions.append({'camera': [0, -90]})
-
-		for _ in range(i-1):
-			search_actions.append(search_action)
-		search_actions.append({'camera': [0, -90]})
-
-		for _ in range(i-1):
-			search_actions.append(search_action)
-		search_actions.append({'camera': [0, -90]})
-
-		for _ in range(i-1):
-			search_actions.append(search_action)
+	# Generate search grid
+	search_actions = search_grid(init_grid_size, max_grid_size, grid_size_increment)
 
 	print_msg = True        # used to stop printing console messages
 	angle_threshold = 150   # indicates that the agent just passed by the goal
@@ -61,7 +43,7 @@ for ep in range(num_episodes):
 	time_counter = 0        # a generic timer for counting duration in time steps
 	cam_turn_factor = 0.03  # proportion of the compass angle, used to turn the camera towards it
 
-	env.seed(seed)
+	# env.seed(seed)
 	obs = env.reset()
 
 	for time_step in range(max_time_steps):
