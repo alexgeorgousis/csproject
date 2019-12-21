@@ -1,0 +1,6 @@
+name: cartpole-gp
+dependencies:
+- python=3
+- pip
+- pip:
+  - gym
