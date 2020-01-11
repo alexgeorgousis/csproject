@@ -116,14 +116,15 @@ class Agent:
 		env = gym.make('CartPole-v0')
 		obs = env.reset()
 		net_reward = 0
+		num_trials = 50000
 
-		for i in range(100):
+		for i in range(num_trials):
 			done = False
 			action_idx = 0
 			trial_reward = 0
 
 			while not done:
-				env.render()
+				# env.render()
 				action = self.final_agent[action_idx]
 				obs, reward, done, _ = env.step(action)
 				trial_reward += reward
@@ -133,6 +134,6 @@ class Agent:
 			
 			net_reward += trial_reward
 
-		print("\nNet reward: " + str(net_reward))
+		print("\nAverage reward over {} trials: {}".format(num_trials, str(net_reward/num_trials)))
 		env.close()
 		
