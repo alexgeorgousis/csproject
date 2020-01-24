@@ -9,17 +9,18 @@ class Agent:
 	
 	def __init__(self):
 		# Agent structure parameters
-		self._T_values = ["pa", 'pv', '0.0']
+		self._T_values = ["pa", 'pv', '0.0', '0.025']
 		self._T_actions = ['L', 'R']
 		self._F = ["IFLTE"]
-		self._actions = {'left': 0, 'right': 1}
+		self._program_depth = 2
+		self._actions = {'L': 0, 'R': 1}
 
 		# GP experiment parameters
 		self._pop_size = 100
 		self._num_eps = 100  # number of episodes to evaluate each program on
 		self._max_gens = 1   # max number of generations to evolve
 
-		self._init_pop = self._gen_init_pop(self._pop_size)
+		self._init_pop = self._gen_init_pop()
 		self._best_program = []
 
 	def train(self):
@@ -27,7 +28,7 @@ class Agent:
 
 		# Evolve generations
 		for gen_idx in range(self._max_gens):
-			print("\nGeneration {}".format(gen_idx+1))
+			print("\nGeneration {}...".format(gen_idx+1))
 
 			scores = self._batch_fit(current_pop)
 
@@ -65,23 +66,31 @@ class Agent:
 		print("\nAverage reward over {} trials: {}".format(self._num_eps, net_reward/self._num_eps))
 		env.close()
 
-	def _gen_init_pop(self, pop_size) -> Population:
-		pop = []
+	def _gen_init_pop(self) -> Population:
+		n = self._pop_size
+		pop = [self._gen_program(self._program_depth) for _ in range(n)]
+		return pop
 
-		for i in range(pop_size):
-			p = []
+	def _gen_program(self, d: int) -> Program:
+		"""
+		Generates a program of arbitrary depth d.
+		"""
 
-			# Program structure
-			func = np.random.choice(self._F)
-			arg1 = np.random.choice(self._T_values)
-			arg2 = np.random.choice(self._T_values)
+		p = []
+		
+		func = np.random.choice(self._F)
+		arg1 = np.random.choice(self._T_values)
+		arg2 = np.random.choice(self._T_values)
+
+		if d <= 1:
 			arg3 = np.random.choice(self._T_actions)
 			arg4 = np.random.choice(self._T_actions)
+		else:
+			arg3 = self._gen_program(d-1)
+			arg4 = self._gen_program(d-1)
 
-			p = [func, arg1, arg2, arg3, arg4]
-
-			pop.append(p)
-		return pop
+		p = [func, arg1, arg2, arg3, arg4]
+		return p
 
 	def _batch_fit(self, pop: Population) -> [float]:
 		"""
@@ -140,12 +149,13 @@ class Agent:
 		- obs: gym environment observation object
 		- return: action (0 or 1 for CartPole-v0)
 		"""
-		result = -1
+		
+		action = -1
 
 		pa = obs[2]
 		pv = obs[3]
 
-		# Extract arg1
+		# Evaluate arguments 1 and 2
 		if p[1] == 'pa':
 			arg1 = pa
 		elif p[1] == 'pv':
@@ -153,7 +163,6 @@ class Agent:
 		else:
 			arg1 = float(p[1])
 
-		# Extract arg2
 		if p[2] == 'pa':
 			arg2 = pa
 		elif p[2] == 'pv':
@@ -161,16 +170,21 @@ class Agent:
 		else:
 			arg2 = float(p[2])
 
-		if arg1 <= arg2:
-			# Evaluate arg3
-			arg3 = self._actions["left"] if p[3] == 'L' else self._actions["right"]
-			result = arg3
-		else:
-			# Evaluate arg4
-			arg4 = self._actions["left"] if p[4] == 'L' else self._actions["right"]
-			result = arg4
+		print("\narg1 = {}, arg2 = {}".format(arg1, arg2))
 
-		return result
+		# Evaluate arguments 3 and 4
+		arg3 = self._eval(p[3], obs) if type(p[3]) is list else self._actions[p[3]]
+		arg4 = self._eval(p[4], obs) if type(p[4]) is list else self._actions[p[4]]
+
+		print("\narg3 = {}, arg4 = {}".format(arg3, arg4))
+
+		# Evaluate IFLTE(arg1, arg2, arg3, arg4)
+		if arg1 <= arg2:
+			action = arg3
+		else:
+			action = arg4
+
+		return action
 
 
 	# Genetic operators #
