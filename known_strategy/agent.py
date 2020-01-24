@@ -9,7 +9,7 @@ class Agent:
 	
 	def __init__(self):
 		# Agent structure parameters
-		self._T = ["pa", '0.05', 'L', 'R']
+		self._T = ["pa", 'pv', '0.0', 'L', 'R']
 		self._F = ["IFLTE"]
 		self._actions = {'left': 0, 'right': 1}
 
@@ -19,7 +19,7 @@ class Agent:
 		self._max_gens = 1   # max number of generations to evolve
 
 		self._init_pop = self._gen_init_pop(self._pop_size)
-		self._best_program = ['IFLTE', 'pa', '-0.05', 'L', 'R']
+		self._best_program = []
 
 	def train(self):
 		current_pop = self._init_pop
@@ -42,20 +42,26 @@ class Agent:
 		if self._best_program == []:
 			self.train()
 
+		print("Best program after training:")
 		print(self._best_program)
+
 		env = gym.make("CartPole-v0")
 
 		net_reward = 0
-		done = False
-		obs = env.reset()
 
-		while True:
-			env.render()
-			action = self._eval(self._best_program, obs)
-			obs, reward, done, _ = env.step(action)
-			net_reward += reward
+		for _ in range(self._num_eps):
+			ep_reward = 0
+			done = False
+			obs = env.reset()
 
-		print(net_reward)
+			while not done:
+				# env.render()
+				action = self._eval(self._best_program, obs)
+				obs, reward, done, _ = env.step(action)
+				ep_reward += reward
+			net_reward += ep_reward
+
+		print("\nAverage reward over {} trials: {}".format(self._num_eps, net_reward/self._num_eps))
 		env.close()
 
 	def _gen_init_pop(self, pop_size) -> Population:
@@ -64,11 +70,12 @@ class Agent:
 		for i in range(pop_size):
 			p = []
 
+			# Program structure
 			func = np.random.choice(self._F)
-			arg1 = np.random.choice(self._T[:2])
-			arg2 = self._T[0] if arg1 == self._T[1] else self._T[1]
-			arg3 = np.random.choice(self._T[2:])
-			arg4 = self._T[2] if arg3 == self._T[3] else self._T[3]
+			arg1 = np.random.choice(self._T[:3])
+			arg2 = self._T[2] if arg1 in self._T[:2] else np.random.choice(self._T[:2])
+			arg3 = np.random.choice(self._T[3:])
+			arg4 = self._T[4] if arg3 == self._T[3] else self._T[3]
 
 			p = [func, arg1, arg2, arg3, arg4]
 
@@ -135,14 +142,30 @@ class Agent:
 		result = -1
 
 		pa = obs[2]
+		pv = obs[3]
 
-		arg1 = pa if p[1] == 'pa' else float(p[1])
-		arg2 = pa if p[2] == 'pa' else float(p[2])
+		# Extract arg1
+		if p[1] == 'pa':
+			arg1 = pa
+		elif p[1] == 'pv':
+			arg1 = pv
+		else:
+			arg1 = float(p[1])
+
+		# Extract arg2
+		if p[2] == 'pa':
+			arg2 = pa
+		elif p[2] == 'pv':
+			arg2 = pv
+		else:
+			arg2 = float(p[2])
 
 		if arg1 <= arg2:
+			# Evaluate arg3
 			arg3 = self._actions["left"] if p[3] == 'L' else self._actions["right"]
 			result = arg3
 		else:
+			# Evaluate arg4
 			arg4 = self._actions["left"] if p[4] == 'L' else self._actions["right"]
 			result = arg4
 
