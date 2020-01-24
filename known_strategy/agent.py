@@ -18,27 +18,40 @@ class Agent:
 		# GP experiment parameters
 		self._pop_size = 100
 		self._num_eps = 100  # number of episodes to evaluate each program on
-		self._max_gens = 1   # max number of generations to evolve
+		self._max_gens = 10   # max number of generations to evolve
+		self._term_score = 195.0  # fitness score termination criterion
 
 		self._init_pop = self._gen_init_pop()
 		self._best_program = []
 
 	def train(self):
-		current_pop = self._init_pop
+		best_program = []
 
 		# Evolve generations
+		current_pop = self._init_pop
 		for gen_idx in range(self._max_gens):
 			print("\nGeneration {}...".format(gen_idx+1))
 
 			scores = self._batch_fit(current_pop)
 
+			# Check termination criteria before evolving next generation
+			max_score = max(scores)
+			if max_score >= self._term_score:
+				best_program = current_pop[scores.index(max_score)]
+				break
+
 			# Selection & reproduction
 			next_pop = [self._select(current_pop, scores) for _ in range(self._pop_size)]
 			current_pop = next_pop
 
-		last_scores = self._batch_fit(current_pop)
-		max_score_idx = last_scores.index(max(last_scores))
-		self._best_program = current_pop[max_score_idx]
+		# If a solution wasn't found before reaching the last generation
+		# pick the best program from the last generation as the solution.
+		if gen_idx >= self._max_gens-1:
+			last_scores = self._batch_fit(current_pop)
+			max_score_idx = last_scores.index(max(last_scores))
+			best_program = current_pop[max_score_idx]
+
+		self._best_program = best_program
 
 	def run(self):
 		if self._best_program == []:
@@ -57,7 +70,7 @@ class Agent:
 			obs = env.reset()
 
 			while not done:
-				# env.render()
+				env.render()
 				action = self._eval(self._best_program, obs)
 				obs, reward, done, _ = env.step(action)
 				ep_reward += reward
@@ -170,13 +183,9 @@ class Agent:
 		else:
 			arg2 = float(p[2])
 
-		print("\narg1 = {}, arg2 = {}".format(arg1, arg2))
-
 		# Evaluate arguments 3 and 4
 		arg3 = self._eval(p[3], obs) if type(p[3]) is list else self._actions[p[3]]
 		arg4 = self._eval(p[4], obs) if type(p[4]) is list else self._actions[p[4]]
-
-		print("\narg3 = {}, arg4 = {}".format(arg3, arg4))
 
 		# Evaluate IFLTE(arg1, arg2, arg3, arg4)
 		if arg1 <= arg2:
