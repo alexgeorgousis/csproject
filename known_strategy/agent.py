@@ -9,12 +9,13 @@ class Agent:
 	
 	def __init__(self):
 		# Agent structure parameters
-		self._T = ["pa", 'pv', '0.0', 'L', 'R']
+		self._T_values = ["pa", 'pv', '0.0']
+		self._T_actions = ['L', 'R']
 		self._F = ["IFLTE"]
 		self._actions = {'left': 0, 'right': 1}
 
 		# GP experiment parameters
-		self._pop_size = 10
+		self._pop_size = 100
 		self._num_eps = 100  # number of episodes to evaluate each program on
 		self._max_gens = 1   # max number of generations to evolve
 
@@ -26,7 +27,7 @@ class Agent:
 
 		# Evolve generations
 		for gen_idx in range(self._max_gens):
-			print("Generation {}".format(gen_idx+1))
+			print("\nGeneration {}".format(gen_idx+1))
 
 			scores = self._batch_fit(current_pop)
 
@@ -42,7 +43,7 @@ class Agent:
 		if self._best_program == []:
 			self.train()
 
-		print("Best program after training:")
+		print("\nBest program after training:")
 		print(self._best_program)
 
 		env = gym.make("CartPole-v0")
@@ -72,10 +73,10 @@ class Agent:
 
 			# Program structure
 			func = np.random.choice(self._F)
-			arg1 = np.random.choice(self._T[:3])
-			arg2 = self._T[2] if arg1 in self._T[:2] else np.random.choice(self._T[:2])
-			arg3 = np.random.choice(self._T[3:])
-			arg4 = self._T[4] if arg3 == self._T[3] else self._T[3]
+			arg1 = np.random.choice(self._T_values)
+			arg2 = np.random.choice(self._T_values)
+			arg3 = np.random.choice(self._T_actions)
+			arg4 = np.random.choice(self._T_actions)
 
 			p = [func, arg1, arg2, arg3, arg4]
 
