@@ -2,3 +2,4 @@
 __pycache__
 known_strategy/test.py
 known_strategy/manual_exp.py
+.vscode
