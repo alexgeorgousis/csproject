@@ -8,6 +8,7 @@ Population = [Program]
 class Agent:
 	
 	def __init__(self):
+
 		# Agent structure parameters
 		self._T_values = ["pa", 'pv', '0.0', '0.025']
 		self._T_actions = ['L', 'R']
@@ -18,11 +19,37 @@ class Agent:
 		# GP experiment parameters
 		self._pop_size = 100
 		self._num_eps = 100  # number of episodes to evaluate each program on
-		self._max_gens = 10   # max number of generations to evolve
+		self._max_gens = 1   # max number of generations to evolve
 		self._term_score = 195.0  # fitness score termination criterion
 
 		self._init_pop = self._gen_init_pop()
 		self._best_program = []
+
+	def run(self):
+		if self._best_program == []:
+			self.train()
+
+		print("\nBest program after training:")
+		print(self._best_program)
+
+		env = gym.make("CartPole-v0")
+
+		net_reward = 0
+
+		for _ in range(self._num_eps):
+			ep_reward = 0
+			done = False
+			obs = env.reset()
+
+			while not done:
+				env.render()
+				action = self._eval(self._best_program, obs)
+				obs, reward, done, _ = env.step(action)
+				ep_reward += reward
+			net_reward += ep_reward
+
+		print("\nAverage reward over {} trials: {}".format(self._num_eps, net_reward/self._num_eps))
+		env.close()	
 
 	def train(self):
 		best_program = []
@@ -52,32 +79,6 @@ class Agent:
 			best_program = current_pop[max_score_idx]
 
 		self._best_program = best_program
-
-	def run(self):
-		if self._best_program == []:
-			self.train()
-
-		print("\nBest program after training:")
-		print(self._best_program)
-
-		env = gym.make("CartPole-v0")
-
-		net_reward = 0
-
-		for _ in range(self._num_eps):
-			ep_reward = 0
-			done = False
-			obs = env.reset()
-
-			while not done:
-				env.render()
-				action = self._eval(self._best_program, obs)
-				obs, reward, done, _ = env.step(action)
-				ep_reward += reward
-			net_reward += ep_reward
-
-		print("\nAverage reward over {} trials: {}".format(self._num_eps, net_reward/self._num_eps))
-		env.close()
 
 	def _gen_init_pop(self) -> Population:
 		n = self._pop_size
