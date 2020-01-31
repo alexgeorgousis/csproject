@@ -1,2 +1,6 @@
-minerl/logs/
-minerl/__pycache__/
+*/logs
+*/.envrc
+*/__pycache__
+cartpole/known_strategy/test.py
+cartpole/known_strategy/manual_exp.py
+*/.vscode

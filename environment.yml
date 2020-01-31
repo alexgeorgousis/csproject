@@ -1,6 +1,10 @@
 name: csproject
 dependencies:
-- python
+- python=3
 - pip
+- numpy
+- matplotlib
 - pip:
   - minerl
+  - gym
+
