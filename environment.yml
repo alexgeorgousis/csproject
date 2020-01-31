@@ -2,6 +2,7 @@ name: csproject
 dependencies:
 - python=3
 - pip
+- pylint
 - numpy
 - matplotlib
 - pip:
