@@ -1,1 +1,3 @@
-This is an attempt at solving the CartPole-v0 OpenAI gym environment using Genetic Programming. 
+Final year Computer Science project at The University of Sussex.
+
+Use Genetic Programming to develop interpretable Reinforcement Learning agents.
