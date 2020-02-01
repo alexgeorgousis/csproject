@@ -3,3 +3,4 @@
 **/__pycache__/
 **/.vscode
 gp_envs/cartpole_main.py
+gp_envs/pundulum_main.py
