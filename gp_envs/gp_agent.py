@@ -45,15 +45,55 @@ class GPAgent:
 
         # Generate initial population
         init_pop = [self._gen_prog(self.max_d, 'grow') for _ in range(self.n)]
-        for p in init_pop:
-            print(p)
 
         # Evolution loop
+        for _ in range(self.max_gens):
+            fit_scores = self._fit(init_pop)
+            print(fit_scores)
 
         return best_program
 
+    def _fit(self, pop):
+        scores = []
+
+        env = gym.make(self.env_name)
+        for p in pop:
+            net_reward = 0
+
+            # Run episodes
+            for _ in range(self.num_eps):
+                ep_reward = 0
+                done = False
+                obs = env.reset()
+
+                # Run single episode
+                while not done:
+                    action = self._eval(p, obs)
+                    obs, rew, done, _ = env.step(action)
+                    ep_reward += rew
+                    
+                net_reward += ep_reward
+
+            # Store average reward
+            scores.append(net_reward / self.num_eps)
+
+        return scores
+
     def _eval(self, p, obs):
-        return 0
+        action = 0
+
+        # Terminals
+        if type(p) is not list:
+            term = self.T[p]
+            if term["token"] == "StateVar":  # variable
+                return obs[term["state_index"]]
+            elif term["token"] == "Constant":  # constant
+                if term["type"] == "Float":  # float
+                    return float(p)
+
+        # Functions
+
+        return action
 
     def _gen_prog(self, max_d, method, type="Action"):
         """
@@ -66,16 +106,21 @@ class GPAgent:
         
         prog = None
 
-        # Pick random terminal
+        # Filter functions and terminals to only include items
+        # of the type specified in the arguments.
+        filt_terms = list(dict(filter(lambda term: term[1]["type"]==type, self.T.items())).keys())
+        filt_funcs = list(dict(filter(lambda func: func[1]["type"]==type, self.F.items())).keys())
+
         if max_d == 0 or (method == "grow" and self.growth_rate > np.random.rand()):
-            # Only choose from the terminals that have the correct type
-            filt_terms = list(dict(filter(lambda term: term[1]["type"]==type, self.T.items())).keys())
             prog = np.random.choice(filt_terms)
         else:
-            # Pick random function and recursively generate random arguments for it
-            func = np.random.choice(list(self.F.keys()))
-            arity = self.F[func]["arity"]
-            args = [self._gen_prog(max_d-1, method) for _ in range(arity)]
-            prog = [func] + args
+            if filt_funcs:
+                # Generate function of correct arity and arg type
+                func = np.random.choice(filt_funcs)
+                arg_types = self.F[func]["arg_types"]
+                args = [self._gen_prog(max_d-1, method, type=t) for t in arg_types]
+                prog = [func] + args
+            else:  # a function of the required type doesn't exist
+                prog = np.random.choice(filt_terms)
 
         return prog
