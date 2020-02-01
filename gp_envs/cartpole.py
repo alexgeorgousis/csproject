@@ -6,16 +6,16 @@ for the Cartpole-v0 environment.
 info = {
     "env_name": "CartPole-v0",
     "T": {
-        "pa": {"type":"Number"}, 
-        "pv": {"type":"Number"}, 
-        "0.0": {"type":"Number"}, 
-        "0.025": {"type":"Number"}, 
-        "0": {"type":"Action"}, 
-        "1": {"type":"Action"}
+        "pa": {"type":"Float", "token": "StateVar", "state_index": 2}, 
+        "pv": {"type":"Float", "token": "StateVar", "state_index": 3}, 
+        "0.0": {"type":"Float", "token": "Constant"}, 
+        "0.025": {"type":"Float", "token": "Constant"}, 
+        "0": {"type":"Action", "token": ""}, 
+        "1": {"type":"Action", "token": ""}
     },
-    "F": {"IFLTE": {"arity": 4}},
+    "F": {"IFLTE": {"arity": 4, "type": "Action", "arg_types": ["Float", "Float", "Action", "Action"]}},
     "max_depth": 2,
-    "term_growth_rate": 0.5,
+    "term_growth_rate": 1.0,
     "pop_size": 1,
     "num_eps": 100,
     "max_gens": 1,
