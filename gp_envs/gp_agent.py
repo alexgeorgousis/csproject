@@ -39,6 +39,7 @@ class GPAgent:
 
             # Run single episode
             while not done:
+                env.render()
                 action = self._eval(best_program, obs)
                 obs, rew, done, _ = env.step(action)
                 ep_reward += rew
@@ -62,6 +63,8 @@ class GPAgent:
             
             # Evaluate population fitness
             fit_scores = self._fit(current_pop)
+            print(fit_scores)
+            print()
 
             # If fitness termination criterion is met, select best program and stop evolution
             max_fitness = max(fit_scores)
@@ -127,6 +130,11 @@ class GPAgent:
                 # Run single episode
                 while not done:
                     action = self._eval(p, obs)
+
+                    # The pendulum env wants an array with a single float.
+                    if (self.env_name == "Pendulum-v0"):
+                        action = [action]
+
                     obs, rew, done, _ = env.step(action)
                     ep_reward += rew
                     
