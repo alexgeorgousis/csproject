@@ -5,6 +5,7 @@ for the Cartpole-v0 environment.
 
 info = {
     "env_name": "CartPole-v0",
+    "program_type": "Action",
     "T": {
         "pa": {"type":"Float", "token": "StateVar", "state_index": 2}, 
         "pv": {"type":"Float", "token": "StateVar", "state_index": 3}, 

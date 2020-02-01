@@ -12,6 +12,7 @@ class GPAgent:
         self.env_name = info["env_name"]
         
         # Program structure params
+        self.p_type = info["program_type"]
         self.T = info["T"]
         self.F = info["F"]
         self.max_d = info["max_depth"]
@@ -51,7 +52,7 @@ class GPAgent:
         best_program = []
 
         # Generate initial population
-        init_pop = [self._gen_prog(self.max_d, 'full') for _ in range(self.n)]
+        init_pop = [self._gen_prog(self.max_d, 'grow', self.p_type) for _ in range(self.n)]
 
         # Evolution loop
         current_pop = init_pop
@@ -80,7 +81,7 @@ class GPAgent:
 
         return best_program
 
-    def _gen_prog(self, max_d, method, type="Action"):
+    def _gen_prog(self, max_d, method, type):
         """
         Generates a random program with a fixed max depth using the terminal and function sets. 
         Supported methods: full and growth.
@@ -103,7 +104,7 @@ class GPAgent:
                 # Generate function of correct arity and arg type
                 func = np.random.choice(filt_funcs)
                 arg_types = self.F[func]["arg_types"]
-                args = [self._gen_prog(max_d-1, method, type=t) for t in arg_types]
+                args = [self._gen_prog(max_d-1, method, t) for t in arg_types]
                 prog = [func] + args
             else:  # a function of the required type doesn't exist
                 prog = np.random.choice(filt_terms)
