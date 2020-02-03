@@ -26,27 +26,13 @@ class GPAgent:
 
     def run(self):
         best_program = self._train()
-        print(best_program)
+        # print(best_program)
 
         env = gym.make(self.env_name)
-        net_reward = 0
 
-        # Run episodes
-        for _ in range(self.num_eps):
-            ep_reward = 0
-            done = False
-            obs = env.reset()
-
-            # Run single episode
-            while not done:
-                env.render()
-                action = self._eval(best_program, obs)
-                obs, rew, done, _ = env.step(action)
-                ep_reward += rew
-                
-            net_reward += ep_reward
-        
+        net_reward = self._run_eps(best_program, env, self.num_eps, render=True)
         print("Reward: {}".format(net_reward / self.num_eps))
+
         env.close()
 
     def _train(self):
@@ -119,33 +105,38 @@ class GPAgent:
 
         env = gym.make(self.env_name)
         for p in pop:
-            net_reward = 0
-
-            # Run episodes
-            for _ in range(self.num_eps):
-                ep_reward = 0
-                done = False
-                obs = env.reset()
-
-                # Run single episode
-                while not done:
-                    action = self._eval(p, obs)
-
-                    obs, rew, done, _ = env.step(action)
-                    
-                    # In Pendulum-v0 the reward is an array for some reason.
-                    # E.g. [-1.24] instead of just -1.24
-                    rew = float(rew)
-                    
-                    ep_reward += rew
-                    
-                net_reward += ep_reward
-
-            # Store average reward
+            # Run episodes and store average reward
+            net_reward = self._run_eps(p, env, self.num_eps)
             scores.append(net_reward / self.num_eps)
         
         env.close()
         return scores
+
+    def _run_eps(self, p, env, num_eps, render=False):
+        net_reward = 0
+
+        # Run episodes
+        for _ in range(num_eps):
+            ep_reward = 0
+            done = False
+            obs = env.reset()
+
+            # Run single episode
+            while not done:
+                if render:
+                    env.render()
+
+                action = self._eval(p, obs)
+                obs, rew, done, _ = env.step(action)
+                
+                # In pendulum, the reward is returned in an array.
+                # So, cast it to a float.
+                rew = float(rew)
+                ep_reward += rew
+                
+            net_reward += ep_reward
+        
+        return net_reward
 
     def _select(self, pop, fit_scores):
         """
