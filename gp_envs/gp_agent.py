@@ -131,11 +131,12 @@ class GPAgent:
                 while not done:
                     action = self._eval(p, obs)
 
-                    # The pendulum env wants an array with a single float.
-                    if (self.env_name == "Pendulum-v0"):
-                        action = [action]
-
                     obs, rew, done, _ = env.step(action)
+                    
+                    # In Pendulum-v0 the reward is an array for some reason.
+                    # E.g. [-1.24] instead of just -1.24
+                    rew = float(rew)
+                    
                     ep_reward += rew
                     
                 net_reward += ep_reward
@@ -153,12 +154,19 @@ class GPAgent:
 
         selected = None
 
+        # Turn fitness scores to the inverse of their absolute value.
+        # E.g. fit_i = 1/abs(fit_i)
+        # This makes roulette wheel selection work for negative fitness scores (e.g. for Pendulum-v0).
+        if (fit_scores[0] < 0):
+            fit_scores = [1/abs(score) for score in fit_scores]
+
         F = sum(fit_scores)
         r = np.random.uniform(0, F)
 
         acc = 0
         for i in range(len(fit_scores)):
             acc += fit_scores[i]
+
             if acc > r:
                 selected = pop[i]
                 break
@@ -172,12 +180,12 @@ class GPAgent:
         if type(p) is not list:
             term = self.T[p]
             if term["token"] == "StateVar":  # state variable
-                return obs[term["state_index"]]
+                action = obs[term["state_index"]]
             elif term["token"] == "Constant":  # constant
                 if term["type"] == "Float":  # float
-                    return float(p)
+                    action = float(p)
             elif term["type"] == "Action":  # action
-                return int(p)
+                action = int(p)
 
         # Functions
         else:
@@ -185,6 +193,10 @@ class GPAgent:
             args = [self._eval(p[i+1], obs) for i in range(self.F[fname]["arity"])]
             if fname == "IFLTE":
                 action = self._IFLTE(args)
+
+        # Actions in Pendulum-v0 are arrays with a single float in them.
+        if (self.env_name == "Pendulum-v0"):
+            action = [action]
 
         return action
 
