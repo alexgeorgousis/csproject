@@ -24,13 +24,13 @@ class GPAgent:
         self.max_gens = info["max_gens"]
         self.term_fit = info["term_fit"]
 
-    def run(self):
+    def run(self, render=True):
         best_program = self._train()
-        # print(best_program)
+        print(best_program)
 
         env = gym.make(self.env_name)
 
-        net_reward = self._run_eps(best_program, env, self.num_eps, render=True)
+        net_reward = self._run_eps(best_program, env, self.num_eps, render=render)
         print("Reward: {}".format(net_reward / self.num_eps))
 
         env.close()
@@ -44,13 +44,12 @@ class GPAgent:
         # Evolution loop
         current_pop = init_pop
         for gen_idx in range(self.max_gens):
-            print("Generation {}".format(gen_idx))
+            print("Generation {}".format(gen_idx+1))
             print(current_pop)
             
             # Evaluate population fitness
             fit_scores = self._fit(current_pop)
-            print(fit_scores)
-            print()
+            print("Mean fitness = {}\n".format(sum(fit_scores)/len(fit_scores)))
 
             # If fitness termination criterion is met, select best program and stop evolution
             max_fitness = max(fit_scores)
