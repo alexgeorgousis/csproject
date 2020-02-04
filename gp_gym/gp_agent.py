@@ -87,8 +87,7 @@ class GPAgent:
         
         prog = None
 
-        # Filter functions and terminals to only include items
-        # of the type specified in the arguments.
+        # Filter functions and terminals to only include items of the specified type.
         filt_terms = list(dict(filter(lambda term: term[1]["type"]==type, self.T.items())).keys())
         filt_funcs = list(dict(filter(lambda func: func[1]["type"]==type, self.F.items())).keys())
 
@@ -158,11 +157,7 @@ class GPAgent:
                 env.render()
 
             action = self._eval(p, obs)
-            obs, rew, done, _ = env.step(action)
-
-            # In pendulum, the reward is returned in an array.
-            # So, cast it to a float.
-            rew = float(rew)
+            obs, rew, _, _ = env.step(action)
             reward += rew
 
         return reward
