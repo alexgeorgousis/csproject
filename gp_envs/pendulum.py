@@ -3,6 +3,8 @@ Data object representation of GP agent
 for the Pendulum-v0 environment.
 """
 
+import numpy as np
+
 info = {
     "env_name": "Pendulum-v0",
     "program_type": "Float",
@@ -10,11 +12,9 @@ info = {
         "costheta": {"type":"Float", "token": "StateVar", "state_index": 0},
         "sintheta": {"type":"Float", "token": "StateVar", "state_index": 1},
         "thetadot": {"type":"Float", "token": "StateVar", "state_index": 2},
-        "-2.0": {"type":"Float", "token": "Constant"},
+        "0.0": {"type":"Float", "token": "Constant"},
+        "1.0": {"type":"Float", "token": "Constant"},
         "-1.0": {"type":"Float", "token": "Constant"},
-        "0.0":  {"type":"Float", "token": "Constant"},
-        "1.0":  {"type":"Float", "token": "Constant"},
-        "2.0":  {"type":"Float", "token": "Constant"},
     },
     "F": {"IFLTE": {"arity": 4, "type": "Float", "arg_types": ["Float", "Float", "Float", "Float"]}},
     "max_depth": 2,

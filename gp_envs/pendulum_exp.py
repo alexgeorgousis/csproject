@@ -74,6 +74,8 @@ def constant_agent(num_trials, num_eps, actions):
                 
             trial_reward += ep_reward
 
+        avg_scores.append(trial_reward/num_eps)
+
     return avg_scores
 
 """ # ----- Experiment 2: single-constant agent -----
@@ -112,3 +114,59 @@ def constant_agent(num_trials, num_eps, actions):
 """
 
 
+
+""" # ----- Experiment 3: single obs state agent -----
+    The agent chooses a single obs value as its action.
+
+
+    def exp3(num_trials, num_eps, obs_idx):
+        avg_trial_scores = []
+
+        env = gym.make("Pendulum-v0")
+        for _ in range(num_trials):
+            trial_reward = 0
+
+            # Run episodes
+            for _ in range(num_eps):
+                ep_reward = 0
+                done = False
+                obs = env.reset()
+
+                # Run single episode
+                while not done:
+                    obs, rew, done, _ = env.step([obs[obs_idx] / np.random.choice(np.arange(0.01, 0.20, 0.01))])
+                    
+                    # In pendulum, the reward is returned in an array.
+                    # So, cast it to a float.
+                    rew = float(rew)
+                    ep_reward += rew
+                    
+                trial_reward += ep_reward
+
+            avg_trial_scores.append(trial_reward/num_eps)
+
+        return avg_trial_scores
+
+    num_trials = 50
+    num_eps = 10
+
+    # costheta
+    avg_costs_cos = exp3(num_trials, num_eps, 0)
+    print("Total average cost (costheta): {}".format(sum(avg_costs_cos)/num_trials))
+
+    # # sintheta
+    # avg_costs_sin = exp3(num_trials, num_eps, 1)
+    # print("Total average cost (sintheta): {}".format(sum(avg_costs_sin)/num_trials))
+
+    # # thetadot
+    # avg_costs_dot = exp3(num_trials, num_eps, 2)
+    # print("Total average cost (thetadot): {}".format(sum(avg_costs_dot)/num_trials))
+
+    plt.plot(range(1, num_trials+1), avg_costs_cos)
+    # plt.plot(range(1, num_trials+1), avg_costs_sin)
+    # plt.plot(range(1, num_trials+1), avg_costs_dot)
+    plt.legend(["cos", "sin", "dot"])
+    plt.xlabel("trial", fontdict={"size": 12})
+    plt.ylabel("cost", fontdict={"size": 12})
+    plt.show()
+"""
