@@ -93,7 +93,7 @@ def init(n):
 
 	population = []
 
-	for i in range(n):
+	for _ in range(n):
 		population.append(gen_rnd_exp(fset, tset, depth))
 	
 	return population
