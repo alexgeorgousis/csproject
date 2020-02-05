@@ -7,8 +7,8 @@ info = {
     "env_name": "CartPole-v0",
     "program_type": "Action",
     "T": {
-        "pa": {"type":"Float", "token": "StateVar", "state_index": 2}, 
-        "pv": {"type":"Float", "token": "StateVar", "state_index": 3}, 
+        "pa": {"type":"Float", "token": "ObsVar", "obs_index": 2}, 
+        "pv": {"type":"Float", "token": "ObsVar", "obs_index": 3}, 
         "0.0": {"type":"Float", "token": "Constant"}, 
         "0.025": {"type":"Float", "token": "Constant"}, 
         "0": {"type":"Action", "token": ""}, 

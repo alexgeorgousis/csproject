@@ -3,8 +3,6 @@ Data object representation of GP agent
 for the Pendulum-v0 environment.
 """
 
-import numpy as np
-
 info = {
     "env_name": "Pendulum-v0",
     "program_type": "Float",
@@ -23,5 +21,5 @@ info = {
     "pop_size": 1,
     "num_eps": 100,
     "max_gens": 1,
-    "term_fit": 195.0
+    "term_fit": -200.0
 }

@@ -76,6 +76,7 @@ class GPAgent:
 
         return best_program
 
+"""
     def _gen_prog(self, max_d, method, type):
         """
         Generates a random program with a fixed max depth using the terminal and function sets. 
@@ -104,6 +105,7 @@ class GPAgent:
                 prog = np.random.choice(filt_terms)
 
         return prog
+"""
 
     def _fit(self, pop):
         scores = []

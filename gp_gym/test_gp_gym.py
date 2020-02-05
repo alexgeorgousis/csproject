@@ -1,6 +1,6 @@
-from gp_gym import *
-from cartpole import info as cartpole_info
-from pendulum import info as pendulum_info
+from gp_gym import gen_init_pop, gen_program
+from cartpole_info import info as cartpole_info
+from pendulum_info import info as pendulum_info
 import numpy as np
 
 
