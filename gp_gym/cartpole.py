@@ -24,6 +24,40 @@ class CartPole:
         self.term_fit = info["term_fit"]
 
 
+    def batch_fit(self, pop, num_eps):
+        """
+        Computes the average fitness score (over a specified number of episodes) 
+        of every program in a population.
+
+        pop: population of programs
+        num_eps: number of episodes to evaluate each program on
+        """
+
+        env = gym.make(self.env_name)
+        scores = [self.fit(env, p, num_eps) for p in pop]
+        env.close()
+        return scores
+
+
+    def fit(self, env, p, num_eps):
+        """
+        Computes the average fitness score of a program over a 
+        specified number of episodes.
+
+        env: gym environment object
+        p: program to evaluate
+        num_eps: number of episodes to run the program for
+        return: fitness score (float)
+        """
+
+        score = 0.0
+
+        for _ in range(num_eps):
+            score += run_ep_while_not_done(env, p, self.eval)
+
+        return score/num_eps
+
+
     def eval(self, p, obs):
         result = 0
 

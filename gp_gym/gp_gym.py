@@ -51,4 +51,18 @@ def gen_program(T, F, max_depth, method, t_rate, p_type):
     return p
 
 
+def run_ep_while_not_done(env, p, eval, render=False):
+    net_reward = 0
 
+    obs = env.reset()
+    done = False
+
+    while not done:
+        if render:
+            env.render()
+
+        action = eval(p, obs)
+        obs, reward, done, info = env.step(action)
+        net_reward += reward
+
+    return net_reward

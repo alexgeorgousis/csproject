@@ -6,8 +6,8 @@ import numpy as np
 
 np.random.seed(0)
 
-cartpole_info["term_growth_rate"] = .5
-cartpole_info["max_depth"] = 2
+cartpole_info["term_growth_rate"] = 1.0
+cartpole_info["max_depth"] = 1
 cartpole_info["pop_size"] = 2
 
 pop_size = cartpole_info["pop_size"]
@@ -28,9 +28,10 @@ print("\n===== CartPole =====")
 # print("p1 = {}".format(p1))
 # print("p2 = {}".format(p2))
 
-print("gen_init_pop()")
-for p in pop:
-    print(p)
+# print("gen_init_pop()")
+# for p in pop:
+#     print(p)
+
 print("===== CartPole =====\n")
 
 
@@ -56,7 +57,7 @@ print("\n===== Pendulum =====")
 # print("p1 = {}".format(p1))
 # print("p2 = {}".format(p2))
 
-print("gen_init_pop()")
-for p in pop:
-    print(p)
+# print("gen_init_pop()")
+# for p in pop:
+#     print(p)
 print("===== Pendulum =====\n")
