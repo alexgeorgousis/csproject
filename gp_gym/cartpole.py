@@ -59,6 +59,15 @@ class CartPole:
 
 
     def eval(self, p, obs):
+        """
+        Interprets a program and evaluates it to an action 
+        given an observation from the environment.
+
+        p: program to interpret
+        obs: observation : [float]
+        return: action {0, 1}
+        """
+
         result = 0
 
         # Terminals
