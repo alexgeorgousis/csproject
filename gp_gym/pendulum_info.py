@@ -7,9 +7,9 @@ info = {
     "env_name": "Pendulum-v0",
     "program_type": "Float",
     "T": {
-        "costheta": {"type":"Float", "token": "StateVar", "state_index": 0},
-        "sintheta": {"type":"Float", "token": "StateVar", "state_index": 1},
-        "thetadot": {"type":"Float", "token": "StateVar", "state_index": 2},
+        "costheta": {"type":"Float", "token": "ObsVar", "obs_index": 0},
+        "sintheta": {"type":"Float", "token": "ObsVar", "obs_index": 1},
+        "thetadot": {"type":"Float", "token": "ObsVar", "obs_index": 2},
         "0.0": {"type":"Float", "token": "Constant"},
         "1.0": {"type":"Float", "token": "Constant"},
         "-1.0": {"type":"Float", "token": "Constant"},
