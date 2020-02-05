@@ -7,36 +7,39 @@ import gym
 import matplotlib.pyplot as plt
 import numpy as np
 
-def random_agent(num_trials, num_eps):
-    avg_scores = []
 
-    env = gym.make("Pendulum-v0")
-    for i in range(num_trials):
-        trial_reward = 0
-
-        # Run episodes
-        for _ in range(num_eps):
-            ep_reward = 0
-            done = False
-            obs = env.reset()
-
-            # Run single episode
-            while not done:
-                action = env.action_space.sample()
-                obs, rew, done, _ = env.step(action)
-                
-                # In pendulum, the reward is returned in an array.
-                # So, cast it to a float.
-                rew = float(rew)
-                ep_reward += rew
-                
-            trial_reward += ep_reward
-        
-        avg_scores.append(trial_reward/num_eps)
-
-    return avg_scores
 
 """ # ----- Experiment 1: random agent -----
+    
+    def random_agent(num_trials, num_eps):
+        avg_scores = []
+
+        env = gym.make("Pendulum-v0")
+        for i in range(num_trials):
+            trial_reward = 0
+
+            # Run episodes
+            for _ in range(num_eps):
+                ep_reward = 0
+                done = False
+                obs = env.reset()
+
+                # Run single episode
+                while not done:
+                    action = env.action_space.sample()
+                    obs, rew, done, _ = env.step(action)
+                    
+                    # In pendulum, the reward is returned in an array.
+                    # So, cast it to a float.
+                    rew = float(rew)
+                    ep_reward += rew
+                    
+                trial_reward += ep_reward
+            
+            avg_scores.append(trial_reward/num_eps)
+
+        return avg_scores
+    
     num_trials = 50
     num_eps = 10
     scores = random_agent(num_trials, num_eps)
@@ -50,35 +53,38 @@ def random_agent(num_trials, num_eps):
     # ----- Experiment 1: random agent -----
 """
 
-def constant_agent(num_trials, num_eps, actions):
-    avg_scores = []
 
-    env = gym.make("Pendulum-v0")
-    for i in range(num_trials):
-        trial_reward = 0
-
-        # Run episodes
-        for _ in range(num_eps):
-            ep_reward = 0
-            done = False
-            obs = env.reset()
-
-            # Run single episode
-            while not done:
-                obs, rew, done, _ = env.step([np.random.choice(actions)])
-                
-                # In pendulum, the reward is returned in an array.
-                # So, cast it to a float.
-                rew = float(rew)
-                ep_reward += rew
-                
-            trial_reward += ep_reward
-
-        avg_scores.append(trial_reward/num_eps)
-
-    return avg_scores
 
 """ # ----- Experiment 2: single-constant agent -----
+
+    def constant_agent(num_trials, num_eps, actions):
+        avg_scores = []
+
+        env = gym.make("Pendulum-v0")
+        for i in range(num_trials):
+            trial_reward = 0
+
+            # Run episodes
+            for _ in range(num_eps):
+                ep_reward = 0
+                done = False
+                obs = env.reset()
+
+                # Run single episode
+                while not done:
+                    obs, rew, done, _ = env.step([np.random.choice(actions)])
+                    
+                    # In pendulum, the reward is returned in an array.
+                    # So, cast it to a float.
+                    rew = float(rew)
+                    ep_reward += rew
+                    
+                trial_reward += ep_reward
+
+            avg_scores.append(trial_reward/num_eps)
+
+        return avg_scores
+
     # Experiment 2.1: determine best actions
     # actions = np.arange(-2.0, 2.1, 0.1)
 
