@@ -2,3 +2,5 @@
 **/.envrc
 **/__pycache__/
 **/.vscode
+gp_gym/test_pendulum.py
+gp_gym/test_gp_gym.py
