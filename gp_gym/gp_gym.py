@@ -66,3 +66,34 @@ def run_ep_while_not_done(env, p, eval, render=False):
         net_reward += reward
 
     return net_reward
+
+
+def IFLTE(args):
+    """ Implements the IFLTE function. """
+    return args[2] if args[0] <= args[1] else args[3]
+
+
+def select(pop, fit_scores):
+    """
+    Fitness Proportionate Selection (Roulette Wheel Selection).
+    Picks a probabilistically fit individual from a population.
+
+    pop: population of programs
+    fit_scores: fitness scores of each program in the population (parallel array to pop)  
+    """
+
+    selected = None
+
+    F = sum(fit_scores)
+    r = np.random.uniform(0, F)
+
+    acc = 0
+    i = 0
+    while (not selected) and (i < len(fit_scores)):
+        acc += fit_scores[i]
+        if acc > r:
+            selected = pop[i]
+        else:
+            i += 1
+
+    return selected
