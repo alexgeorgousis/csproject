@@ -36,10 +36,16 @@ class CartPole:
 
             # Evaluate population fitness
             fit_scores = self.batch_fit(current_pop, self.num_eps)
+            max_fitness = max(fit_scores)
 
-            # Check environment solution criterion
-            if ...:
-                best_program = ...
+            # Check termination criteria
+            if (max_fitness >= self.term_fit) or (gen_idx >= self.max_gens - 1):
+                best_program = current_pop[fit_scores.index(max_fitness)]
+
+            # Evolve next generation
+            else:
+                current_pop = [select(current_pop, fit_scores) for _ in range(self.pop_size)]
+                gen_idx += 1
 
         return best_program
 
@@ -54,12 +60,12 @@ class CartPole:
         """
 
         env = gym.make(self.env_name)
-        scores = [self.fit(env, p, num_eps, render=render) for p in pop]
+        scores = [self.fit(p, num_eps, env=env, render=render) for p in pop]
         env.close()
         return scores
 
 
-    def fit(self, env, p, num_eps, render=False):
+    def fit(self, p, num_eps, env=None, render=False):
         """
         Computes the average fitness score of a program over a 
         specified number of episodes.
@@ -71,6 +77,9 @@ class CartPole:
         """
 
         score = 0.0
+
+        if not env:
+            env = gym.make(self.env_name)
 
         for _ in range(num_eps):
             score += run_ep_while_not_done(env, p, self.eval, render=render)
