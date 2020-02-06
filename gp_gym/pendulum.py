@@ -19,9 +19,35 @@ class Pendulum:
 
         # GP parameters
         self.pop_size = info["pop_size"]
-        self.num_eps = info["num_eps"]
+        self.num_time_steps = info["num_time_steps"]
         self.max_gens = info["max_gens"]
         self.term_fit = info["term_fit"]
+
+
+    def train(self):
+        best_program = None
+
+        # Generate initial population
+        current_pop = gen_init_pop(self.pop_size, self.T, self.F, self.max_depth, self.method, self.t_rate, self.p_type)
+
+        # Evolution loop
+        gen_idx = 0
+        while (not best_program) and (gen_idx < self.max_gens):
+
+            # Evaluate population fitness
+            fit_scores = self.batch_fit(current_pop, self.num_time_steps)
+            max_fitness = max(fit_scores)
+
+            # Check termination criteria
+            if (max_fitness >= self.term_fit) or (gen_idx >= self.max_gens - 1):
+                best_program = current_pop[fit_scores.index(max_fitness)]
+
+            # Evolve next generation
+            else:
+                current_pop = [select(current_pop, fit_scores) for _ in range(self.pop_size)]
+                gen_idx += 1
+
+        return best_program
 
 
     def batch_fit(self, pop, num_time_steps):
@@ -33,12 +59,12 @@ class Pendulum:
         """
 
         env = gym.make(self.env_name)
-        scores = [self.fit(env, p, num_time_steps) for p in pop]
+        scores = [self.fit(p, num_time_steps, env=env) for p in pop]
         env.close()
         return scores
 
 
-    def fit(self, env, p, num_time_steps):
+    def fit(self, p, num_time_steps, env=None, render=False):
         """
         Computes the fitness score (total reward) of a program in a single Pendulum-v0 episode.
         
@@ -54,8 +80,15 @@ class Pendulum:
 
         score = 0.0
 
+        if not env:
+            env = gym.make(self.env_name)
+
         obs = env.reset()
         for _ in range(num_time_steps):
+
+            if render:
+                env.render()
+
             action = self.eval(p, obs)
             obs, reward, done, info = env.step([action])
             score += reward

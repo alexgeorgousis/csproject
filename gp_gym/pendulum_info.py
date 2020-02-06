@@ -19,7 +19,7 @@ info = {
     "term_growth_rate": 1.0,
     "method": 'grow',
     "pop_size": 1,
-    "num_eps": 100,
+    "num_time_steps": 2000,
     "max_gens": 1,
     "term_fit": -200.0
 }
