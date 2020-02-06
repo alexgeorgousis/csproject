@@ -1,3 +1,3 @@
-Final year Computer Science project at The University of Sussex.
+Final year Computer Science project at the University of Sussex.
 
-Use Genetic Programming to develop interpretable Reinforcement Learning agents.
+Using Genetic Programming to develop interpretable Reinforcement Learning agents.
