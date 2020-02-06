@@ -4,3 +4,4 @@
 **/.vscode
 gp_gym/test_pendulum.py
 gp_gym/test_gp_gym.py
+gp_gym/test_cartpole.py
