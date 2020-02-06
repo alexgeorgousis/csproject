@@ -1,4 +1,5 @@
-from gp_gym import *
+import gym
+from gp_gym import gen_init_pop, select, IFLTE
 
 
 class Pendulum:
@@ -90,7 +91,7 @@ class Pendulum:
                 env.render()
 
             action = self.eval(p, obs)
-            obs, reward, done, info = env.step([action])
+            obs, reward, _, _ = env.step([action])
             score += reward
 
         # Make score positive

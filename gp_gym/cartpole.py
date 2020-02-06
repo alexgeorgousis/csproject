@@ -1,4 +1,5 @@
-from gp_gym import *
+import gym
+from gp_gym import gen_init_pop, select, run_ep_while_not_done, IFLTE
 
 
 class CartPole:
@@ -123,11 +124,6 @@ class CartPole:
 
             # IFLTE
             if fname == "IFLTE":
-                result = self.IFLTE(args)
+                result = IFLTE(args)
 
         return result
-
-
-    def IFLTE(self, args):
-        """ Implements the IFLTE function. """
-        return args[2] if args[0] <= args[1] else args[3]
