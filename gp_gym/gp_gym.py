@@ -84,6 +84,11 @@ def select(pop, fit_scores):
 
     selected = None
 
+    # Turn negative fitness scores to positive without losing relative fitness information
+    fit_scores = np.array(fit_scores)
+    if fit_scores[0] < 0:
+        fit_scores = 1 / abs(fit_scores)
+
     F = sum(fit_scores)
     r = np.random.uniform(0, F)
 
