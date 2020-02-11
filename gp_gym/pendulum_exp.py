@@ -8,48 +8,30 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+"""
+# ----- Experiment 1: random agent -----
 
-""" # ----- Experiment 1: random agent -----
-    
-    def random_agent(num_trials, num_eps):
-        avg_scores = []
+    # Experiment parameters
+    num_eps = 200
 
-        env = gym.make("Pendulum-v0")
-        for i in range(num_trials):
-            trial_reward = 0
+    # Run experiment
+    env = gym.make("Pendulum-v0")
+    net_reward = 0.0
 
-            # Run episodes
-            for _ in range(num_eps):
-                ep_reward = 0
-                done = False
-                obs = env.reset()
+    for _ in range(num_eps):
+        obs = env.reset()
+        ep_reward = 0.0
+        done = False
 
-                # Run single episode
-                while not done:
-                    action = env.action_space.sample()
-                    obs, rew, done, _ = env.step(action)
-                    
-                    # In pendulum, the reward is returned in an array.
-                    # So, cast it to a float.
-                    rew = float(rew)
-                    ep_reward += rew
-                    
-                trial_reward += ep_reward
-            
-            avg_scores.append(trial_reward/num_eps)
+        while not done:
+            obs, reward, done, _ = env.step([obs[1]])
+            ep_reward += reward
+        net_reward += ep_reward
+    env.close()
 
-        return avg_scores
-    
-    num_trials = 50
-    num_eps = 10
-    scores = random_agent(num_trials, num_eps)
-    # print(sum(scores)/len(scores))
+    # Print result
+    print("Average reward over {} episodes: {}".format(num_eps, net_reward/num_eps))
 
-    plt.plot(range(1, len(scores)+1), scores)
-    # plt.title("Random agent", fontdict={"size": 16})
-    plt.ylabel("Average Cost", fontdict={"size": 12})
-    plt.xlabel("Trial", fontdict={"size": 12})
-    # plt.show()
     # ----- Experiment 1: random agent -----
 """
 
@@ -176,3 +158,51 @@ import numpy as np
     plt.ylabel("cost", fontdict={"size": 12})
     plt.show()
 """
+
+
+
+"""# ----- Experiment 4: GP agent -----
+"""
+
+from pendulum_info import info
+from pendulum import Pendulum
+
+
+# GP parameters
+info["max_depth"] = 2
+info["term_growth_rate"] = 0.5
+info["num_eps"] = 2
+info["num_time_steps"] = 500
+info["pop_size"] = 100
+info["max_gens"] = 3
+info["term_fit"] = -500
+
+# Train agent
+agent = Pendulum(info)
+p, avg_gen_fit = agent.train()
+print("\nProgram:\n{}".format(p))
+
+# Compute avg show the rate of change of fitness from generation to generation
+avg_fit_change = np.mean(np.abs(np.diff(avg_gen_fit)))
+print("Average fitness change: {}".format(avg_fit_change))
+plt.plot(range(1, len(avg_gen_fit)+1), avg_gen_fit)
+plt.show()
+
+# Run experiment
+env = gym.make("Pendulum-v0")
+net_reward = 0.0
+
+for i in range(100):
+    # env.render()
+    obs = env.reset()
+    ep_reward = 0.0
+    done = False
+
+    while not done:
+        obs, reward, done, _ = env.step([agent.eval(p, obs)])
+        ep_reward += reward
+    net_reward += ep_reward
+env.close()
+
+# Print result
+print("Average reward: {}".format(net_reward/100))
