@@ -1,5 +1,7 @@
 import gym
+import numpy as np
 from gp_gym import gen_init_pop, select, IFLTE
+import time
 
 
 class Pendulum:
@@ -20,13 +22,15 @@ class Pendulum:
 
         # GP parameters
         self.pop_size = info["pop_size"]
-        self.num_time_steps = info["num_time_steps"]
+        self.num_eps = info["num_eps"]                # number of episodes to evaluate each program on
+        self.num_time_steps = info["num_time_steps"]  # number of time steps per episode
         self.max_gens = info["max_gens"]
         self.term_fit = info["term_fit"]
 
 
     def train(self):
         best_program = None
+        gen_scores = []  # used to record avg fitness of each generation
 
         # Generate initial population
         current_pop = gen_init_pop(self.pop_size, self.T, self.F, self.max_depth, self.method, self.t_rate, self.p_type)
@@ -36,10 +40,17 @@ class Pendulum:
         while (not best_program) and (gen_idx < self.max_gens):
 
             # Evaluate population fitness
-            fit_scores = self.batch_fit(current_pop, self.num_time_steps)
-            max_fitness = max(fit_scores)
+            start_time = time.time()
+            fit_scores = self.batch_fit(current_pop, self.num_time_steps, self.num_eps)
+            end_time = time.time()
+
+            # Store average population fitness
+            print("Gen {}: {}".format(gen_idx+1, np.mean(fit_scores)))
+            gen_scores.append(np.mean(fit_scores))
+            print("Time: {}\n".format(end_time - start_time))
 
             # Check termination criteria
+            max_fitness = max(fit_scores)
             if (max_fitness >= self.term_fit) or (gen_idx >= self.max_gens - 1):
                 best_program = current_pop[fit_scores.index(max_fitness)]
 
@@ -48,10 +59,10 @@ class Pendulum:
                 current_pop = [select(current_pop, fit_scores) for _ in range(self.pop_size)]
                 gen_idx += 1
 
-        return best_program
+        return best_program, gen_scores
 
 
-    def batch_fit(self, pop, num_time_steps):
+    def batch_fit(self, pop, num_time_steps, num_eps):
         """
         Computes the fitness score of every program in a population.
 
@@ -60,44 +71,45 @@ class Pendulum:
         """
 
         env = gym.make(self.env_name)
-        scores = [self.fit(p, num_time_steps, env=env) for p in pop]
+        scores = [self.fit(p, num_time_steps, num_eps, env=env) for p in pop]
         env.close()
         return scores
 
 
-    def fit(self, p, num_time_steps, env=None, render=False):
+    def fit(self, p, num_time_steps, num_eps, env=None, render=False):
         """
-        Computes the fitness score (total reward) of a program in a single Pendulum-v0 episode.
-        
-        The reward in Pendulum-v0 is always negative. To make it work with fitness proportionate selection, 
-        this function converts it to a positive number, while preserving its relative fitness information:
-        reward = 1/|reward|
+        Computes the average reward of a program.
 
         env: gym environment object
         p: program to evaluate
-        num_eps: number of time steps to run the episode for
+        num_time_steps: number of time steps to run each episode for
+        num_eps: number of episodes to run program for
         return: fitness score (float)
         """
 
-        score = 0.0
+        avg_score = 0.0
+        ep_score = 0.0
 
         if not env:
             env = gym.make(self.env_name)
 
-        obs = env.reset()
-        for _ in range(num_time_steps):
+        for i in range(num_eps):
 
-            if render:
-                env.render()
+            # Run single episode
+            obs = env.reset()
+            for j in range(num_time_steps):
 
-            action = self.eval(p, obs)
-            obs, reward, _, _ = env.step([action])
-            score += reward
+                if render:
+                    env.render()
 
-        # Make score positive
-        score = 1 / abs(score)
+                action = self.eval(p, obs)
+                obs, reward, _, _ = env.step([action])
+                ep_score += reward
+            # End run single episode
 
-        return score
+        avg_score = ep_score / num_eps
+        
+        return avg_score
 
 
     def eval(self, p, obs):
