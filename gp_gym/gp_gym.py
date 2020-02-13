@@ -102,3 +102,30 @@ def select(pop, fit_scores):
             i += 1
 
     return selected
+
+def mutate(p, T, F, max_depth, method, t_rate):
+    """
+    Performs subtree mutation on p.
+    In this version of the function, p is either:
+     - a terminal
+     - a function with 4 arguments
+
+    p: program to mutate
+    return: mutated program
+    """
+
+    mut_p = None
+
+    # Mutate atom
+    if type(p) is not list:
+        mut_p = gen_program(T, F, max_depth, method, t_rate, T[p]["type"])
+    
+    # If function: mutate one of its arguments
+    else:
+        arity = F[p[0]]["arity"]
+        r = np.random.randint(1, high=arity+1)
+
+        mut_p = [gen_program(T, F, max_depth, method, 1.0, T[p[i]]["type"]) if i==r else p[i] for i in range(1, len(p))]
+        mut_p.insert(0, p[0])
+
+    return mut_p
