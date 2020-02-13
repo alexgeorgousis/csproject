@@ -19,7 +19,9 @@ info = {
     "term_growth_rate": 1.0,
     "method": 'grow',
     "pop_size": 1,
-    "num_time_steps": 2000,
+    "num_time_steps": 200,
+    "num_eps": 100,
     "max_gens": 1,
-    "term_fit": -200.0
+    "term_fit": -800.0,
+    "mutation_rate": 1.0
 }
