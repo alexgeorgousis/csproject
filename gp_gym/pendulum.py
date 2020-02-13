@@ -1,6 +1,6 @@
 import gym
 import numpy as np
-from gp_gym import gen_init_pop, select, IFLTE
+from gp_gym import gen_init_pop, select, mutate, IFLTE
 import time
 
 
@@ -26,6 +26,7 @@ class Pendulum:
         self.num_time_steps = info["num_time_steps"]  # number of time steps per episode
         self.max_gens = info["max_gens"]
         self.term_fit = info["term_fit"]
+        self.mut_rate = info["mutation_rate"]
 
 
     def train(self):
@@ -45,9 +46,9 @@ class Pendulum:
             end_time = time.time()
 
             # Store average population fitness
-            print("Gen {}: {}".format(gen_idx+1, np.mean(fit_scores)))
+            # print("Gen {}: {}".format(gen_idx+1, np.mean(fit_scores)))
             gen_scores.append(np.mean(fit_scores))
-            print("Time: {}\n".format(end_time - start_time))
+            # print("Time: {}\n".format(end_time - start_time))
 
             # Check termination criteria
             max_fitness = max(fit_scores)
@@ -56,7 +57,20 @@ class Pendulum:
 
             # Evolve next generation
             else:
-                current_pop = [select(current_pop, fit_scores) for _ in range(self.pop_size)]
+                next_pop = []
+                
+                # Mutation
+                num_mutations = int(self.mut_rate * self.pop_size)
+                for _ in range(num_mutations):
+                    selected = select(current_pop, fit_scores)
+                    mutated = mutate(selected, self.T, self.F, self.max_depth, self.method, self.t_rate)
+                    next_pop.append(mutated)
+
+                # Reproduction
+                for _ in range(num_mutations, self.pop_size):
+                    next_pop.append(select(current_pop, fit_scores))
+                
+                current_pop = next_pop
                 gen_idx += 1
 
         return best_program, gen_scores
