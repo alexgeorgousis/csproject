@@ -5,6 +5,7 @@ dependencies:
 - pylint
 - numpy
 - matplotlib
+- deap
 - pip:
   - minerl
   - gym
