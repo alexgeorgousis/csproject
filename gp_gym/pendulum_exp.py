@@ -160,49 +160,97 @@ import numpy as np
 """
 
 
-
 """# ----- Experiment 4: GP agent -----
+
+    from pendulum_info import info
+    from pendulum import Pendulum
+
+
+    # GP parameters
+    info["max_depth"] = 1
+    info["term_growth_rate"] = 0.5
+    info["num_eps"] = 2
+    info["num_time_steps"] = 500
+    info["pop_size"] = 100
+    info["max_gens"] = 10
+    info["term_fit"] = -500
+    info["mutation_rate"] = 0.1
+
+    # Train agent
+    agent = Pendulum(info)
+    p, avg_gen_fit = agent.train()
+    print("\nProgram:\n{}".format(p))
+
+    # Run experiment
+    env = gym.make("Pendulum-v0")
+    net_reward = 0.0
+
+    for i in range(100):
+        # env.render()
+        obs = env.reset()
+        ep_reward = 0.0
+        done = False
+
+        while not done:
+            obs, reward, done, _ = env.step([agent.eval(p, obs)])
+            ep_reward += reward
+        net_reward += ep_reward
+    env.close()
+
+    # Print result
+    print("Average reward: {}".format(net_reward/100))
 """
 
-from pendulum_info import info
-from pendulum import Pendulum
+"""# ----- Experiment 5: mutation -----
 
 
-# GP parameters
-info["max_depth"] = 2
-info["term_growth_rate"] = 0.5
-info["num_eps"] = 2
-info["num_time_steps"] = 500
-info["pop_size"] = 100
-info["max_gens"] = 3
-info["term_fit"] = -500
+    from pendulum_info import info
+    from pendulum import Pendulum
 
-# Train agent
-agent = Pendulum(info)
-p, avg_gen_fit = agent.train()
-print("\nProgram:\n{}".format(p))
 
-# Compute avg show the rate of change of fitness from generation to generation
-avg_fit_change = np.mean(np.abs(np.diff(avg_gen_fit)))
-print("Average fitness change: {}".format(avg_fit_change))
-plt.plot(range(1, len(avg_gen_fit)+1), avg_gen_fit)
-plt.show()
+    # GP parameters
+    info["max_depth"] = 1
+    info["term_growth_rate"] = 0.5
+    info["num_eps"] = 2
+    info["num_time_steps"] = 500
+    info["pop_size"] = 100
+    info["max_gens"] = 10
+    info["term_fit"] = -500
 
-# Run experiment
-env = gym.make("Pendulum-v0")
-net_reward = 0.0
+    avg_changes = []
+    for i in range(10):
+        
+        print("Without mutation #{}".format(i+1))
 
-for i in range(100):
-    # env.render()
-    obs = env.reset()
-    ep_reward = 0.0
-    done = False
+        # Train agent
+        info["mutation_rate"] = 0.0
+        agent = Pendulum(info)
+        p, avg_gen_fit = agent.train()
 
-    while not done:
-        obs, reward, done, _ = env.step([agent.eval(p, obs)])
-        ep_reward += reward
-    net_reward += ep_reward
-env.close()
+        # Compute avg show the rate of change of fitness from generation to generation
+        avg_fit_change = np.mean(np.abs(np.diff(avg_gen_fit)))
+        # print("Average fitness change: {}".format(avg_fit_change))
+        avg_changes.append(avg_fit_change)
 
-# Print result
-print("Average reward: {}".format(net_reward/100))
+    print("---------------------------------------------")
+
+    avg_changes_mut = []
+    for j in range(10):
+        
+        print("\nWith mutation #{}".format(j+1))
+
+        # Train agent
+        info["mutation_rate"] = 0.1
+        agent = Pendulum(info)
+        p, avg_gen_fit = agent.train()
+
+        # Compute avg show the rate of change of fitness from generation to generation
+        avg_fit_change = np.mean(np.abs(np.diff(avg_gen_fit)))
+        # print("Average fitness change: {}".format(avg_fit_change))
+        avg_changes_mut.append(avg_fit_change)
+
+    print(avg_changes)
+    print(avg_changes_mut)
+    print("\nAverage change without mutation: {}".format(np.mean(avg_changes)))
+    print("Average change with mutation: {}".format(np.mean(avg_changes_mut)))
+"""
