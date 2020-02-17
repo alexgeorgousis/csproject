@@ -40,15 +40,17 @@ class Pendulum:
         gen_idx = 0
         while (not best_program) and (gen_idx < self.max_gens):
 
+            print("\nGeneration {}...".format(gen_idx+1))
+            start = time.time()
+
             # Evaluate population fitness
-            start_time = time.time()
             fit_scores = self.batch_fit(current_pop, self.num_time_steps, self.num_eps)
-            end_time = time.time()
+
+            end = time.time()
+            print("Train time: {}".format(end-start))
 
             # Store average population fitness
-            # print("Gen {}: {}".format(gen_idx+1, np.mean(fit_scores)))
             gen_scores.append(np.mean(fit_scores))
-            # print("Time: {}\n".format(end_time - start_time))
 
             # Check termination criteria
             max_fitness = max(fit_scores)
