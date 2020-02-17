@@ -12,10 +12,12 @@ class Pendulum:
     def __init__(self, info):
 
         # Extract agent info
-        self.env_name = info["env_name"]
-        self.pop_size = info["pop_size"]
-        self.max_gens = info["max_gens"]
-        self.term_fit = info["term_fit"]
+        self.env_name  = info["env_name"]
+        self.pop_size  = info["pop_size"]
+        self.max_gens  = info["max_gens"]
+        self.num_eps   = info["num_eps"]
+        self.num_steps = info["num_time_steps"]
+        self.term_fit  = info["term_fit"]
 
         # Primitive set
         self.pset = gp.PrimitiveSet("main", 3)
@@ -35,7 +37,7 @@ class Pendulum:
         self.toolbox.register("gen_pop", tools.initRepeat, list, self.toolbox.gen_program)
 
         # Genetic operators
-        self.toolbox.register("select", tools.selRoulette)
+        self.toolbox.register("select", tools.selTournament, tournsize=3)
 
 
     def train(self):
@@ -65,13 +67,13 @@ class Pendulum:
             max_fitness = max(pop_fitness)[0]
             if (gen_count >= self.max_gens) or (max_fitness >= self.term_fit):
                 for indiv in pop:
-                    if indiv.fitness.values >= max_fitness:
+                    if indiv.fitness.values[0] >= max_fitness:
                         best_program = indiv
                         break
                 
             else:
                 # Apply selection & reproduction
-                pop[:] = self.toolbox.select(pop, self.pop_size)
+                pop = self.toolbox.select(pop, self.pop_size).copy()
 
                 # Apply mutation
 
@@ -85,22 +87,20 @@ class Pendulum:
 
     def fit(self, indiv):
         fitness = 0.0
+        net_cost = 0.0
 
         env = gym.make(self.env_name)
         executable = gp.compile(indiv, self.pset)
 
-        net_cost = 0.0
-        num_eps = 100
-        for _ in range(num_eps):
+        for _ in range(self.num_eps):
             obs = env.reset()
-            done = False
-            while not done:
+            for _ in range(self.num_steps):
                 action = executable(obs[0], obs[1], obs[2])
-                obs, cost, done, _ = env.step([action])
+                obs, cost, _, _ = env.step([action])
                 net_cost += cost
 
         env.close()
-        fitness = net_cost/num_eps
+        fitness = net_cost/self.num_eps
         return np.round(fitness, decimals=5),
 
     def IFLTE(self, arg1, arg2, arg3, arg4):
