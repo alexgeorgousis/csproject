@@ -15,6 +15,7 @@ info = {
     "F": {"IFLTE": {"arity": 4, "type": "Float", "arg_types": ["Float", "Float", "Float", "Float"]}},
 
     "env_name": "Pendulum-v0",
+    "program_type": "Float",
     "max_depth": 2,
     "term_growth_rate": 1.0,
     "method": 'grow',
