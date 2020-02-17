@@ -15,6 +15,7 @@ class Pendulum:
         self.env_name = info["env_name"]
         self.pop_size = info["pop_size"]
         self.max_gens = info["max_gens"]
+        self.term_fit = info["term_fit"]
 
         # Primitive set
         self.pset = gp.PrimitiveSet("main", 3)
@@ -33,8 +34,8 @@ class Pendulum:
         self.toolbox.register("gen_program", tools.initIterate, creator.Individual, self.toolbox.gen_exp)
         self.toolbox.register("gen_pop", tools.initRepeat, list, self.toolbox.gen_program)
 
-        # Fitness evaluation function
-        self.toolbox.register("fit", self.fit)
+        # Genetic operators
+        self.toolbox.register("select", tools.selRoulette)
 
 
     def train(self):
@@ -56,14 +57,28 @@ class Pendulum:
             start = time.time()
 
             # Evaluate population fitness
-            pop_fitness = map(self.toolbox.fit, pop)
+            pop_fitness = [self.fit(p) for p in pop]
             for indiv, fitness in zip(pop, pop_fitness):
                 indiv.fitness.values = fitness
 
-            end = time.time()
-            print("Train time: {}".format(end-start))
+            # Check termination criteria
+            max_fitness = max(pop_fitness)[0]
+            if (gen_count >= self.max_gens) or (max_fitness >= self.term_fit):
+                for indiv in pop:
+                    if indiv.fitness.values >= max_fitness:
+                        best_program = indiv
+                        break
+                
+            else:
+                # Apply selection & reproduction
+                pop[:] = self.toolbox.select(pop, self.pop_size)
+
+                # Apply mutation
 
             gen_count += 1
+
+            end = time.time()
+            print("Train time: {}".format(end-start))
 
         return best_program
 
@@ -86,7 +101,7 @@ class Pendulum:
 
         env.close()
         fitness = net_cost/num_eps
-        return fitness,
+        return np.round(fitness, decimals=5),
 
     def IFLTE(self, arg1, arg2, arg3, arg4):
         if arg1 <= arg2:
