@@ -2,6 +2,7 @@ import gym
 import numpy as np
 import time
 from deap import gp, base, creator, tools
+import copy
 
 
 class Pendulum:
@@ -36,7 +37,11 @@ class Pendulum:
         self.toolbox.register("gen_program", tools.initIterate, creator.Individual, self.toolbox.gen_exp)
         self.toolbox.register("gen_pop", tools.initRepeat, list, self.toolbox.gen_program)
 
+        # Fitness evaluation function
+        self.toolbox.register("fit", self.fit)
+
         # Genetic operators
+        self.toolbox.register("clone", self._clone)
         self.toolbox.register("select", tools.selTournament, tournsize=3)
 
 
@@ -59,7 +64,7 @@ class Pendulum:
             start = time.time()
 
             # Evaluate population fitness
-            pop_fitness = [self.fit(p) for p in pop]
+            pop_fitness = [self.toolbox.fit(p) for p in pop]
             for indiv, fitness in zip(pop, pop_fitness):
                 indiv.fitness.values = fitness
 
@@ -72,8 +77,14 @@ class Pendulum:
                         break
                 
             else:
-                # Apply selection & reproduction
-                pop = self.toolbox.select(pop, self.pop_size).copy()
+                # Apply selection
+                selected = self.toolbox.select(pop, self.pop_size)
+
+                # Clone individuals to avoid reference issues
+                # and reset their fitness values
+                selected_cloned = [self.toolbox.clone(indiv) for indiv in selected]
+                for indiv in selected_cloned:
+                    del indiv.fitness.values
 
                 # Apply mutation
 
@@ -108,3 +119,6 @@ class Pendulum:
             return arg3
         else:
             return arg4
+
+    def _clone(self, indiv):
+        return copy.deepcopy(indiv)
