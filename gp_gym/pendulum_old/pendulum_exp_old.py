@@ -161,45 +161,45 @@ import numpy as np
 
 
 """# ----- Experiment 4: GP agent -----
-
-    from pendulum_info_old import info
-    from pendulum import_old Pendulum
-
-
-    # GP parameters
-    info["max_depth"] = 1
-    info["term_growth_rate"] = 0.5
-    info["num_eps"] = 2
-    info["num_time_steps"] = 500
-    info["pop_size"] = 100
-    info["max_gens"] = 10
-    info["term_fit"] = -500
-    info["mutation_rate"] = 0.1
-
-    # Train agent
-    agent = Pendulum(info)
-    p, avg_gen_fit = agent.train()
-    print("\nProgram:\n{}".format(p))
-
-    # Run experiment
-    env = gym.make("Pendulum-v0")
-    net_reward = 0.0
-
-    for i in range(100):
-        # env.render()
-        obs = env.reset()
-        ep_reward = 0.0
-        done = False
-
-        while not done:
-            obs, reward, done, _ = env.step([agent.eval(p, obs)])
-            ep_reward += reward
-        net_reward += ep_reward
-    env.close()
-
-    # Print result
-    print("Average reward: {}".format(net_reward/100))
 """
+from pendulum_info_old import info
+from pendulum_old import Pendulum
+
+
+# GP parameters
+info["max_depth"] = 2
+info["term_growth_rate"] = 0.5
+info["num_eps"] = 2
+info["num_time_steps"] = 500
+info["pop_size"] = 100
+info["max_gens"] = 10
+info["term_fit"] = -500
+info["mutation_rate"] = 0.0
+
+# Train agent
+agent = Pendulum(info)
+p, avg_gen_fit = agent.train()
+print("\nProgram:\n{}".format(p))
+
+# Run experiment
+env = gym.make("Pendulum-v0")
+net_reward = 0.0
+
+for i in range(100):
+    # env.render()
+    obs = env.reset()
+    ep_reward = 0.0
+    done = False
+
+    while not done:
+        obs, reward, done, _ = env.step([agent.eval(p, obs)])
+        ep_reward += reward
+    net_reward += ep_reward
+env.close()
+
+# Print result
+print("Average reward: {}".format(net_reward/100))
+
 
 """# ----- Experiment 5: mutation -----
 
