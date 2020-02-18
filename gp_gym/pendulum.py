@@ -29,7 +29,7 @@ class Pendulum:
         self.pset.addTerminal(1.0)
 
         # Program generation functions
-        creator.create("CostMin", base.Fitness, weights=(-1.0,))
+        creator.create("CostMin", base.Fitness, weights=(1.0,))
         creator.create("Individual", gp.PrimitiveTree, fitness=creator.CostMin, pset=self.pset)
         self.toolbox = base.Toolbox()
         method = gp.genGrow if info["method"] == "grow" else gp.genFull
