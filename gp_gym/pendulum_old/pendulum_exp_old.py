@@ -162,8 +162,8 @@ import numpy as np
 
 """# ----- Experiment 4: GP agent -----
 
-    from pendulum_info import info
-    from pendulum import Pendulum
+    from pendulum_info_old import info
+    from pendulum import_old Pendulum
 
 
     # GP parameters
