@@ -34,7 +34,7 @@ class Pendulum:
         creator.create("Individual", gp.PrimitiveTree, fitness=creator.CostMin, pset=self.pset)
         self.toolbox = base.Toolbox()
         method = gp.genGrow if info["method"] == "grow" else gp.genFull
-        self.toolbox.register("gen_exp", method, pset=self.pset, min_=0, max_=info["max_depth"])
+        self.toolbox.register("gen_exp", method, pset=self.pset, min_=1, max_=info["max_depth"])
         self.toolbox.register("gen_program", tools.initIterate, creator.Individual, self.toolbox.gen_exp)
         self.toolbox.register("gen_pop", tools.initRepeat, list, self.toolbox.gen_program)
 
@@ -43,14 +43,22 @@ class Pendulum:
 
         # Genetic operators
         self.toolbox.register("clone", self._clone)
-        self.toolbox.register("select", tools.selTournament, tournsize=10)
-        self.toolbox.register("mutate", gp.mutUniform, expr=self.toolbox.gen_exp, pset=self.pset)
+        self.toolbox.register("select", tools.selTournament, tournsize=3)
+        self.toolbox.register("mut_gen_exp", method, pset=self.pset, min_=0, max_=info["max_depth"])
+        self.toolbox.register("mutate", gp.mutUniform, expr=self.toolbox.mut_gen_exp, pset=self.pset)
+
+        # Statistics functions
+        self.stats = tools.Statistics(key=lambda indiv: indiv.fitness.values)
+        self.stats.register("avg", np.mean)
+        self.logbook = tools.Logbook()
 
 
     def train(self):
         """
         This is where the GP algorithm is implemented.
         This method uses all the auxiliary methods to perform a full GP run.
+
+        :returns: the best program found during training
         """
 
         best_program = None
@@ -69,6 +77,10 @@ class Pendulum:
             pop_fitness = [self.toolbox.fit(p, self.num_eps) for p in pop]
             for indiv, fitness in zip(pop, pop_fitness):
                 indiv.fitness.values = fitness
+
+            # Record population statistics
+            record = self.stats.compile(pop)
+            self.logbook.record(gen=gen_count, **record)
 
             # Check termination criteria
             max_fitness = max(pop_fitness)[0]
