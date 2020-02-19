@@ -19,6 +19,7 @@ class Pendulum:
         self.num_eps   = info["num_eps"]
         self.num_steps = info["num_time_steps"]
         self.term_fit  = info["term_fit"]
+        self.mut_rate  = info["mutation_rate"]
 
         # Primitive set
         self.pset = gp.PrimitiveSet("main", 3)
@@ -33,7 +34,7 @@ class Pendulum:
         creator.create("Individual", gp.PrimitiveTree, fitness=creator.CostMin, pset=self.pset)
         self.toolbox = base.Toolbox()
         method = gp.genGrow if info["method"] == "grow" else gp.genFull
-        self.toolbox.register("gen_exp", method, pset=self.pset, min_=1, max_=info["max_depth"])
+        self.toolbox.register("gen_exp", method, pset=self.pset, min_=0, max_=info["max_depth"])
         self.toolbox.register("gen_program", tools.initIterate, creator.Individual, self.toolbox.gen_exp)
         self.toolbox.register("gen_pop", tools.initRepeat, list, self.toolbox.gen_program)
 
@@ -42,7 +43,8 @@ class Pendulum:
 
         # Genetic operators
         self.toolbox.register("clone", self._clone)
-        self.toolbox.register("select", tools.selTournament, tournsize=3)
+        self.toolbox.register("select", tools.selTournament, tournsize=10)
+        self.toolbox.register("mutate", gp.mutUniform, expr=self.toolbox.gen_exp, pset=self.pset)
 
 
     def train(self):
@@ -64,7 +66,7 @@ class Pendulum:
             start = time.time()
 
             # Evaluate population fitness
-            pop_fitness = [self.toolbox.fit(p) for p in pop]
+            pop_fitness = [self.toolbox.fit(p, self.num_eps) for p in pop]
             for indiv, fitness in zip(pop, pop_fitness):
                 indiv.fitness.values = fitness
 
@@ -82,11 +84,18 @@ class Pendulum:
 
                 # Clone individuals to avoid reference issues
                 # and reset their fitness values
-                selected_cloned = [self.toolbox.clone(indiv) for indiv in selected]
-                for indiv in selected_cloned:
+                selected = [self.toolbox.clone(indiv) for indiv in selected]
+                for indiv in selected:
                     del indiv.fitness.values
 
                 # Apply mutation
+                for indiv in selected:
+                    if np.random.rand() < self.mut_rate:
+                        indiv = self.toolbox.mutate(indiv)[0]
+                        del indiv.fitness.values
+
+                # Update population
+                pop = selected
 
             gen_count += 1
 
@@ -96,14 +105,14 @@ class Pendulum:
         return best_program
 
 
-    def fit(self, indiv):
+    def fit(self, indiv, num_eps):
         fitness = 0.0
         net_cost = 0.0
 
         env = gym.make(self.env_name)
         executable = gp.compile(indiv, self.pset)
 
-        for _ in range(self.num_eps):
+        for _ in range(num_eps):
             obs = env.reset()
             for _ in range(self.num_steps):
                 action = executable(obs[0], obs[1], obs[2])
@@ -111,7 +120,7 @@ class Pendulum:
                 net_cost += cost
 
         env.close()
-        fitness = net_cost/self.num_eps
+        fitness = net_cost/num_eps
         return np.round(fitness, decimals=5),
 
     def IFLTE(self, arg1, arg2, arg3, arg4):
