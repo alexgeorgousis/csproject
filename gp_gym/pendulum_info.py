@@ -13,5 +13,5 @@ info = {
     "num_eps": 100,
     "max_gens": 1,
     "term_fit": -800.0,
-    "mutation_rate": 1.0
+    "mutation_rate": 0.1
 }
