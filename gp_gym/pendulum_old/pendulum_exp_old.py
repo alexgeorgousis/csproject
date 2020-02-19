@@ -161,7 +161,7 @@ import numpy as np
 
 
 """# ----- Experiment 4: GP agent -----
-"""
+
 from pendulum_info_old import info
 from pendulum_old import Pendulum
 
@@ -199,7 +199,7 @@ env.close()
 
 # Print result
 print("Average reward: {}".format(net_reward/100))
-
+"""
 
 """# ----- Experiment 5: mutation -----
 
@@ -254,3 +254,33 @@ print("Average reward: {}".format(net_reward/100))
     print("\nAverage change without mutation: {}".format(np.mean(avg_changes)))
     print("Average change with mutation: {}".format(np.mean(avg_changes_mut)))
 """
+
+from pendulum_info_old import info
+from pendulum_old import Pendulum
+
+# Experiment parameters
+num_eps = 100
+num_steps = 200
+
+# Train agent
+agent = Pendulum(info)
+p = ["IFLTE", "costheta", "thetadot", "0.0", ["IFLTE", "thetadot", "0.0", "costheta", "sintheta"]]
+
+# Run experiment
+env = gym.make("Pendulum-v0")
+net_reward = 0.0
+
+for i in range(num_eps):
+    # env.render()
+    obs = env.reset()
+    ep_reward = 0.0
+    done = False
+
+    for j in range(num_steps):
+        obs, reward, done, _ = env.step([agent.eval(p, obs)])
+        ep_reward += reward
+    net_reward += ep_reward
+env.close()
+
+# Print result
+print("Average reward: {}".format(net_reward/num_eps))
