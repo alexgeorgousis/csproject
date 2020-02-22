@@ -75,7 +75,7 @@ class Pendulum:
             start = time.time()
 
             # Evaluate population fitness
-            pop_fitness = [self.toolbox.fit(p, self.num_eps) for p in pop]
+            pop_fitness = [self.toolbox.fit(p, self.num_eps, self.num_steps) for p in pop]
             for indiv, fitness in zip(pop, pop_fitness):
                 indiv.fitness.values = fitness
 
@@ -118,7 +118,7 @@ class Pendulum:
         return best_program
 
 
-    def fit(self, indiv, num_eps):
+    def fit(self, indiv, num_eps, num_steps):
         fitness = 0.0
         net_cost = 0.0
 
@@ -127,7 +127,7 @@ class Pendulum:
 
         for _ in range(num_eps):
             obs = env.reset()
-            for _ in range(self.num_steps):
+            for _ in range(num_steps):
                 action = executable(obs[0], obs[1], obs[2])
                 obs, cost, _, _ = env.step([action])
                 net_cost += cost
