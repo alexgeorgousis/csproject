@@ -20,6 +20,7 @@ class Pendulum:
         self.num_steps = info["num_time_steps"]
         self.term_fit  = info["term_fit"]
         self.mut_rate  = info["mutation_rate"]
+        self.tour_size = info["tournament_size"]
 
         # Primitive set
         self.pset = gp.PrimitiveSet("main", 3)
@@ -43,7 +44,7 @@ class Pendulum:
 
         # Genetic operators
         self.toolbox.register("clone", self._clone)
-        self.toolbox.register("select", tools.selTournament, tournsize=3)
+        self.toolbox.register("select", tools.selTournament, tournsize=self.tour_size)
         self.toolbox.register("mut_gen_exp", method, pset=self.pset, min_=0, max_=info["max_depth"])
         self.toolbox.register("mutate", gp.mutUniform, expr=self.toolbox.mut_gen_exp, pset=self.pset)
 
