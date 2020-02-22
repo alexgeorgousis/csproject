@@ -15,3 +15,4 @@ info = {
     "term_fit": -800.0,
     "mutation_rate": 0.1,
     "tournament_size": 1
+}
