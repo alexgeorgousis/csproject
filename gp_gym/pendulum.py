@@ -3,6 +3,7 @@ import numpy as np
 import time
 from deap import gp, base, creator, tools
 import copy
+import operator
 
 
 class Pendulum:
@@ -25,9 +26,16 @@ class Pendulum:
         # Primitive set
         self.pset = gp.PrimitiveSet("main", 3)
         self.pset.renameArguments(ARG0="costheta", ARG1="sintheta", ARG2="thetadot")
+
         self.pset.addPrimitive(self.IFLTE, 4)
-        self.pset.addTerminal(-1.0)
-        self.pset.addTerminal(0.0)
+        self.pset.addPrimitive(operator.add, 2)
+        self.pset.addPrimitive(operator.sub, 2)
+        self.pset.addPrimitive(operator.mul, 2)
+        self.pset.addPrimitive(operator.neg, 1)
+
+        self.pset.addTerminal(0.0)        
+        self.pset.addTerminal(0.25)
+        self.pset.addTerminal(0.5)
         self.pset.addTerminal(1.0)
 
         # Program generation functions
@@ -118,7 +126,7 @@ class Pendulum:
         return best_program
 
 
-    def fit(self, indiv, num_eps, num_steps):
+    def fit(self, indiv, num_eps, num_steps, render=False):
         fitness = 0.0
         net_cost = 0.0
 
@@ -128,6 +136,11 @@ class Pendulum:
         for _ in range(num_eps):
             obs = env.reset()
             for _ in range(num_steps):
+                
+                if render:
+                    env.render()
+                    time.sleep(0.02)
+                
                 action = executable(obs[0], obs[1], obs[2])
                 obs, cost, _, _ = env.step([action])
                 net_cost += cost
