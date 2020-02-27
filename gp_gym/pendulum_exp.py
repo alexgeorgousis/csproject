@@ -9,12 +9,12 @@ import matplotlib.pyplot as plt
 num_runs = 10
 
 # GP Parameters
-info["pop_size"] = 100
-info["max_gens"] = 10
+info["pop_size"] = 200
+info["max_gens"] = 20
 info["term_fit"] = -200
 info["tournament_size"] = 10
 info["mutation_rate"] = 0.1
-info["max_depth"] = 3
+info["max_depth"] = 5
 
 # Fitness Evaluation (training)
 info["num_eps"] = 4
