@@ -1,12 +1,10 @@
 """
 Data object representation of GP agent 
-for the Pendulum-v0 environment.
+for a Gym environment.
 """
 
 info = {
-    "env_name": "Pendulum-v0",
     "max_depth": 2,
-    "term_growth_rate": 1.0,
     "method": 'grow',
     "pop_size": 1,
     "num_time_steps": 200,
