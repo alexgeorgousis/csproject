@@ -9,4 +9,5 @@ dependencies:
   - minerl
   - gym
   - deap
+  - box2d-py
 
