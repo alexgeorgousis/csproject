@@ -12,7 +12,7 @@ class MountainCar:
 
     def __init__(self, info):
         # Extract agent info
-        self.env_name  = "MountainCar-v0"
+        self.env_name  = info["env_name"]
         self.pop_size  = info["pop_size"]
         self.max_gens  = info["max_gens"]
         self.num_eps   = info["num_eps"]
@@ -26,6 +26,8 @@ class MountainCar:
         self.pset.renameArguments(ARG0="position", ARG1="velocity")
 
         self.pset.addPrimitive(self.IFLTE, [float, float, int, int], int)
+        self.pset.addPrimitive(self.get_0, [], float)
+
         self.pset.addTerminal(0, int)
         self.pset.addTerminal(1, int)
         self.pset.addTerminal(2, int)
@@ -38,6 +40,18 @@ class MountainCar:
         self.toolbox.register("gen_exp", method, pset=self.pset, min_=1, max_=info["max_depth"])
         self.toolbox.register("gen_program", tools.initIterate, creator.Individual, self.toolbox.gen_exp)
         self.toolbox.register("gen_pop", tools.initRepeat, list, self.toolbox.gen_program)
+
+        # Fitness evaluation function
+        self.toolbox.register("fit", self.fit)
+
+        # Genetic operators
+        self.toolbox.register("clone", self._clone)
+        self.toolbox.register("select", tools.selTournament, tournsize=self.tour_size)
+
+        # Statistics functions
+        self.stats = tools.Statistics(key=lambda indiv: indiv.fitness.values)
+        self.stats.register("avg", np.mean)
+        self.logbook = tools.Logbook()
 
     def train(self):
         """
@@ -52,10 +66,6 @@ class MountainCar:
         # Generate initial population
         pop = self.toolbox.gen_pop(n=self.pop_size)
 
-        for i in pop:
-            print(i)
-
-        """
         # Evolution loop
         gen_count = 1
         while (gen_count <= self.max_gens) and (not best_program):
@@ -91,10 +101,10 @@ class MountainCar:
                     del indiv.fitness.values
 
                 # Apply mutation
-                for indiv in selected:
-                    if np.random.rand() < self.mut_rate:
-                        indiv = self.toolbox.mutate(indiv)[0]
-                        del indiv.fitness.values
+                # for indiv in selected:
+                #     if np.random.rand() < self.mut_rate:
+                #         indiv = self.toolbox.mutate(indiv)[0]
+                #         del indiv.fitness.values
 
                 # Update population
                 pop = selected
@@ -103,7 +113,7 @@ class MountainCar:
 
             end = time.time()
             print("Train time: {}".format(end-start))
-        """
+        
         return best_program
 
     def fit(self, indiv, num_eps, num_steps, render=False):
@@ -115,14 +125,15 @@ class MountainCar:
 
         for _ in range(num_eps):
             obs = env.reset()
-            for _ in range(num_steps):
+            done = False
+            while not done:
                 
                 if render:
                     env.render()
                     time.sleep(0.02)
                 
                 action = executable(obs[0], obs[1])
-                obs, cost, _, _ = env.step(action)
+                obs, cost, done, _ = env.step([action])
                 net_cost += cost
 
         env.close()
@@ -135,5 +146,8 @@ class MountainCar:
         else:
             return arg4
 
-    def get_position(self):
-        return "notaparam"
+    def get_0(self):
+        return 0.0
+
+    def _clone(self, indiv):
+        return copy.deepcopy(indiv)
