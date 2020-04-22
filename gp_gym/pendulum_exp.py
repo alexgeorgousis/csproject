@@ -27,7 +27,7 @@ num_steps_test = 200
 
 
 # --- Run experiment --- #
-avg_fit_matrix = np.zeros((num_runs, info["max_gens"]))
+avg_fitnesses = np.zeros((num_runs, info["max_gens"]))
 best_programs = []
 best_program_fitnesses = np.zeros(num_runs)
 for i in range(num_runs):
@@ -40,7 +40,7 @@ for i in range(num_runs):
 
     # Save average generation fitnesses
     avg = agent.logbook.select("avg")
-    avg_fit_matrix[i] = avg
+    avg_fitnesses[i] = avg
 
     # Evaluate best program of this run
     fitness = agent.fit(best_program, num_eps_test, num_steps_test)[0]
@@ -54,7 +54,7 @@ for i in range(num_runs):
 # --- Show Results --- #
 # Compute average fitness of each generation over all of the runs of the experiment
 # i.e. [avg_gen1_fit, avg_gen2_fit, ..., avg_gen_n_fit]
-avg_fit = np.mean(avg_fit_matrix, axis=0)
+avg_fit = np.mean(avg_fitnesses, axis=0)
 gens = agent.logbook.select("gen")  # [1, 2, ..., max_gens]
 
 # Plot average fitness vs generations
