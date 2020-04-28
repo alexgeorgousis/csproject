@@ -1,5 +1,5 @@
-from pendulum import Pendulum
-from pendulum_info import info
+from pendulum_top_quadrants import Pendulum
+from gp_gym_info import info
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 # --- Parameters --- #
 # Experiment Parameters
 num_runs = 10
+
+# Environment Parameters
+info["env_name"] = "Pendulum-v0"
 
 # GP Parameters
 info["pop_size"] = 200
