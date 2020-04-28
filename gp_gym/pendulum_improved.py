@@ -16,7 +16,7 @@ class PendulumImproved:
         # The number of states the pendulum env is split into (and therefore the number of sub-programs to generate for each individual)
         self.NUM_STATES = 4 
 
-        # Extract agent info
+        # Agent info
         self.env_name  = info["env_name"]
         self.pop_size  = info["pop_size"]
         self.max_gens  = info["max_gens"]
