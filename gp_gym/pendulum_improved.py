@@ -6,7 +6,7 @@ import copy
 import operator
 
 
-class PendulumImproved:
+class Pendulum:
     """
     This class implements a GP agent for the Pendulum-v0 gym environment.
     """
