@@ -6,7 +6,7 @@ import copy
 import operator
 
 
-class Pendulum:
+class PendulumQuadrants:
     """
     This class implements a GP agent for the Pendulum-v0 gym environment.
     """
@@ -14,7 +14,7 @@ class Pendulum:
     def __init__(self, info):
 
         # The number of states the pendulum env is split into (and therefore the number of sub-programs to generate for each individual)
-        self.NUM_STATES = 4 
+        self.NUM_STATES = 4
 
         # Agent info
         self.env_name  = info["env_name"]
@@ -36,10 +36,10 @@ class Pendulum:
         self.pset.addPrimitive(operator.mul, 2)
         self.pset.addPrimitive(operator.neg, 1)
 
-        self.pset.addTerminal(0.0)
-        self.pset.addTerminal(0.25)
-        self.pset.addTerminal(0.5)
-        self.pset.addTerminal(1.0)
+        # self.pset.addTerminal(0.0)
+        # self.pset.addTerminal(0.25)
+        # self.pset.addTerminal(0.5)
+        # self.pset.addTerminal(1.0)
 
         # Program generation functions
         creator.create("CostMin", base.Fitness, weights=(1.0,))

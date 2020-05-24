@@ -1,4 +1,4 @@
-from pendulum_top_quadrants import Pendulum
+from pendulum import Pendulum
 from gp_gym_info import info
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,15 +13,15 @@ info["env_name"] = "Pendulum-v0"
 
 # GP Parameters
 info["pop_size"] = 200
-info["max_gens"] = 20
-info["term_fit"] = -200
+info["max_gens"] = 30
+info["term_fit"] = 0
 info["tournament_size"] = 10
 info["mutation_rate"] = 0.1
-info["max_depth"] = 5
+info["max_depth"] = 10
 
 # Fitness Evaluation (training)
-info["num_eps"] = 4
-info["num_time_steps"] = 500
+info["num_eps"] = 10
+info["num_time_steps"] = 200
 
 # Fitness evaluation (testing)
 num_eps_test = 100
@@ -55,10 +55,15 @@ for i in range(num_runs):
 
 
 # --- Show Results --- #
+
 # Compute average fitness of each generation over all of the runs of the experiment
 # i.e. [avg_gen1_fit, avg_gen2_fit, ..., avg_gen_n_fit]
 avg_fit = np.mean(avg_fitnesses, axis=0)
 gens = agent.logbook.select("gen")  # [1, 2, ..., max_gens]
+
+# Print average solution fitness over all runs of the experiment
+mean_solution_fit = np.mean(best_program_fitnesses)
+print("\nAverage solution fitness over {} runs of the experiment: {}".format(num_runs, mean_solution_fit))
 
 # Plot average fitness vs generations
 plt.plot(gens, avg_fit)
@@ -67,11 +72,7 @@ plt.ylabel("average fitness")
 plt.xticks(ticks=gens)
 plt.show()
 
-# Print average solution fitness over all runs of the experiment
-mean_solution_fit = np.mean(best_program_fitnesses)
-print("\nAverage solution fitness over {} runs of the experiment: {}".format(num_runs, mean_solution_fit))
-
-# Print best programs
+# Print best programs and their fitness
 print("\nBest programs:")
-for p in best_programs:
-    print(p)
+for i in range(len(best_programs)):
+    print("{} --- {}".format(best_programs[i], best_program_fitnesses[i]))

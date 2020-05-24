@@ -28,15 +28,16 @@ class Pendulum:
         self.pset.renameArguments(ARG0="costheta", ARG1="sintheta", ARG2="thetadot")
 
         self.pset.addPrimitive(self.IFLTE, 4)
-        self.pset.addPrimitive(operator.add, 2)
-        self.pset.addPrimitive(operator.sub, 2)
-        self.pset.addPrimitive(operator.mul, 2)
+        # self.pset.addPrimitive(operator.add, 2)
+        # self.pset.addPrimitive(operator.sub, 2)
+        # self.pset.addPrimitive(operator.mul, 2)
         self.pset.addPrimitive(operator.neg, 1)
 
+        # self.pset.addTerminal(-1.0)
         self.pset.addTerminal(0.0)
-        self.pset.addTerminal(0.25)
-        self.pset.addTerminal(0.5)
-        self.pset.addTerminal(1.0)
+        # self.pset.addTerminal(0.25)
+        # self.pset.addTerminal(0.5)
+        # self.pset.addTerminal(1.0)
 
         # Program generation functions
         creator.create("CostMin", base.Fitness, weights=(1.0,))
@@ -128,13 +129,15 @@ class Pendulum:
 
     def fit(self, indiv, num_eps, num_steps, render=False):
         fitness = 0.0
-        net_cost = 0.0
+        ep_cost = 0.0
+        ep_cost_lst = []
 
         env = gym.make(self.env_name)
         executable = gp.compile(indiv, self.pset)
 
         for _ in range(num_eps):
             obs = env.reset()
+            ep_cost = 0.0
             for _ in range(num_steps):
                 
                 if render:
@@ -143,10 +146,11 @@ class Pendulum:
                 
                 action = executable(obs[0], obs[1], obs[2])
                 obs, cost, _, _ = env.step([action])
-                net_cost += cost
+                ep_cost += cost
+            ep_cost_lst.append(ep_cost)
 
         env.close()
-        fitness = net_cost/num_eps
+        fitness = np.mean(ep_cost_lst)
         return np.round(fitness, decimals=5),
 
     def IFLTE(self, arg1, arg2, arg3, arg4):

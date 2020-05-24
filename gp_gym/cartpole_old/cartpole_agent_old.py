@@ -18,8 +18,8 @@ class Agent:
 
 		# GP experiment parameters
 		self._pop_size = 100
-		self._num_eps = 100  # number of episodes to evaluate each program on
-		self._max_gens = 1   # max number of generations to evolve
+		self._num_eps = 1000  # number of episodes to evaluate each program on
+		self._max_gens = 2   # max number of generations to evolve
 		self._term_score = 195.0  # fitness score termination criterion
 
 		self._init_pop = self._gen_init_pop()
