@@ -6,7 +6,7 @@ import copy
 import operator
 
 
-class PendulumQuadrants:
+class Pendulum:
     """
     This class implements a GP agent for the Pendulum-v0 gym environment.
     """
@@ -33,11 +33,11 @@ class PendulumQuadrants:
         self.pset.addPrimitive(self.IFLTE, 4)
         # self.pset.addPrimitive(operator.add, 2)
         # self.pset.addPrimitive(operator.sub, 2)
-        self.pset.addPrimitive(operator.mul, 2)
+        # self.pset.addPrimitive(operator.mul, 2)
         self.pset.addPrimitive(operator.neg, 1)
 
-        # self.pset.addTerminal(0.0)
-        # self.pset.addTerminal(0.25)
+        self.pset.addTerminal(0.0)
+        self.pset.addTerminal(0.025)
         # self.pset.addTerminal(0.5)
         # self.pset.addTerminal(1.0)
 
