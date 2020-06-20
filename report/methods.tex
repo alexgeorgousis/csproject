@@ -1,0 +1,84 @@
+\chapter{Methods}
+This project aims to investigate the suitability of GP for solving modern AI problems. To this end, a GP algorithm was implemented and trained on a few chosen RL environments, and experiments were conducted to evaluate its performance. The purpose of this chapter is to provide an overview of the general structure of the RL environments used in this project, cover the details of the GP algorithm implemented to solve them, and serve as a guide for replicating the results discussed in the following chapters.
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% 4.1 Gym Environments %
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{RL Environments}
+The RL environments used in this project were implemented by OpenAI and are publicly available in their open-source gym library\footnote{\url{https://gym.openai.com/}}. The library offers a simple API for running an environment as a simulation (see code snippet in figure 4.1), following the reinforcement learning loop described in the relevant Background section. For the simulation to start, the environment needs to be reset, a process which generates the initial state (observation) of the environment. The simulation can then start running for, at most, a predefined number of time-steps or until one of the termination criteria is met. On each step, a value which is interpreted as the action the agent wishes to take, must be passed to the environment. This value must belong to the action space defined by the environment for it to be considered valid. After the action is received by the environment, its internal state is updated accordingly and the corresponding observation object is returned to the agent, along with a numerical value which represents the reward, and a boolean value indicating whether any of the termination criteria have been met. The last component of these environments is a solution criterion, a condition in which they are considered "solved". The solution criteria for each of the environments discussed in this report are mentioned at the beginning of each corresponding chapter.
+
+\begin{figure}[ht]
+    \centering
+    \begin{minted}[linenos]{python}
+    import gym
+    
+    env = gym.make('CartPole-v0')
+    obs = env.reset()
+    done = False
+    
+    while not done:
+        env.render()
+        # Take a random action
+        action = env.action_space.sample()
+        obs, reward, done, _ = env.step(action)
+    env.close()
+    \end{minted}
+    \caption{Implementation of a random agent for the cart-pole environment}
+    \label{fig:simple_gym_env}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 4.2 Genetic Programming %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Genetic Programming}
+\subsection{Program Structure}
+The DSL designed for the GP algorithm is a simple typed functional language. The function and terminal sets were made flexible to be able to be adapted to the RL environment the language was used for. Regardless of the specific functions and terminals used, however, the program structure remained the same. Each program is a function that takes the environment state as input and outputs an action to be taken in the next time-step in the environment. The simplest program in this language consists of a single terminal and, therefore, represents an agent that constantly takes a single action, regardless of the environment state. 
+
+\subsection{Program Representation}
+In this implementation of GP, programs are represented as trees, where each node is either a function or a constant and the branches represent a function-input relationship between the two nodes they connect (this is described in detail in the relevant Background section). In the project, these trees were implemented as Python lists. The first element of such a list is the name of a function (the root of the tree) as a string. The remaining elements of the list are the inputs to that function and they can be lists themselves (sub-trees) or the string representation of the terminal they encode. For example, the list representation of the tree depicted in figure \ref{fig:example_program_tree} would be:
+
+\begin{verbatim}
+["IFLTE", "pa", "0", ["IFLTE", "pv", "0", "L", "R"], "R"]
+\end{verbatim}
+
+For the sake of readability, a string representation of programs was implemented. In this representation, the program represented as a list above would be:
+
+\begin{verbatim}
+"IFLTE(pa, 0, IFLTE(pv, 0, L, R), R)"
+\end{verbatim}
+
+This representation looks much more like the functional programming style of syntax that these programs were meant to follow.
+
+\subsection{Algorithm Details}
+The pseudocode for the main GP algorithm is shown in Algorithm 1. The inputs to the algorithm are the size of the population, the maximum number of generations that can be evolved before termination, the termination fitness, and the mutation rate. The algorithm first creates an initial population of randomly generated programs. Next, it iteratively computes the fitness of each program in the population, uses the computed fitness scores to select programs to form the next generation (the same program can be selected more than once), applies mutation to the selected programs, gets the best program (highest fitness) from the new population, and updates the generation counter. This loop terminates if the maximum number of generations has been reached or if the best program has a fitness score greater than or equal to the termination fitness score. Once the loop terminates, the algorithm outputs the last recorded best program and exits.
+
+\begin{algorithm}[ht]
+	\caption{GP}
+	\textbf{Inputs:} pop\_size, max\_gens, term\_fitness, mutation\_rate
+	\begin{algorithmic}[1]
+	    \State best\_program $\leftarrow$ NULL
+	    \State population $\leftarrow$ gen\_init\_pop(pop\_size)
+	    \Repeat
+	        \State population\_fitness $\leftarrow$ fitness(population)
+	        \State selected $\leftarrow$ select(population, pop\_size, population\_fitness)
+	        \State mutate(selected, mutation\_rate)
+	        \State population $\leftarrow$ selected
+	        \State best\_program $\leftarrow$ best(population, population\_fitness)
+	        \State gen $\leftarrow$ gen + 1
+	    \Until gen $\geq$ max\_gens \textbf{or} fitness(best\_program) $\geq$ term\_fitness
+	\end{algorithmic}
+	\textbf{Output:} best\_program
+\end{algorithm}
+
+\subsubsection{Fitness Function}
+The fitness function is the point of intersection between the GP algorithm and the RL environments. For the fitness of a program in the population to be computed, a gym environment has to be set up. The program is used to decide the action that is passed to the \verb+step+ function of the environment object (line 11 in figure \ref{fig:simple_gym_env}). Specifically, the interpreter implemented for the DSL is called with the program in question as input, and the output returned by the interpreter is passed to the step function. The fitness of the program is the average reward collected during the environment run.
+
+\section{Performance Evaluation}
+For each of the environments the GP algorithm was trained on, experiments were performed to evaluate the algorithm's performance. All experiments followed a similar structure so that the results would be comparable across different environments and different versions of the algorithm, to assess the effect of any modifications meaningfully. 
+
+Each experiment was described by a set of parameters which were used to tune various properties of the GP algorithm and of the experiment itself. These parameters included the population size, the maximum number of generations the algorithm would evolve before terminating, the maximum fitness it would attempt to achieve (terminal fitness), and the maximum program depth, mutation rate and tournament size. Not all of these parameters were used in every experiment, as some depended on the complexity of the program structure and specific components of the algorithm that were not used in some experiments. Finally, the number of times the experiment would be performed had to be defined to average the results over multiple instances (runs) of the experiment, to make the results more robust.
+
+The results that were recorded during each experiment were (1) the average fitness achieved by each generation of programs, (2) the fitness of the best-performing program of the last generation (which should, on average, be the best-performing program of the entire GP run), and (3) the best-performing program itself. (1) was used to produce a graph to visually represent the rate of improvement of the algorithm across all generations, which would provide useful information, such as the rate of convergence, for assessing the algorithm's performance and diagnosing problems, such as early convergence. (2) defined a metric for the overall performance of the algorithm and was used to assess improvement (or lack thereof) as well as compare the results achieved here with publicly available results on the same environments, particularly ones that use popular neural-network-based algorithms. Finally, (3) was analysed to assess the interpretability of the strategies produced by the GP algorithm, as well as to reason about potential modifications to the program structure that could improve performance.

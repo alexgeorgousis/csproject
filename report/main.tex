@@ -1,0 +1,63 @@
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{minted}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+\usepackage{biblatex}
+\graphicspath{ {images/} }
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+% Citations
+\addbibresource{references.bib}
+
+\title{\textbf{Genetic Programming as an Interpretable Alternative to Black-Box Machine Learning Models}}
+\author{
+    \textbf{Alexandros Georgousis}\\\\
+    Candidate Number: 198828\\
+    Supervisor: Dr. Christopher Buckley\\\\
+    Department of Informatics\\
+    BSc Computer Science
+}
+\date{May 2020}
+
+\begin{document}
+
+\begin{titlepage}
+\maketitle
+\end{titlepage}
+
+\section*{Declaration}
+This report is submitted as part requirement for the degree of BSc Computer Science at the University of Sussex. It is the product of my own labour except where indicated in the text. The report may be freely copied and distributed provided the source is acknowledged. I hereby give permission for a copy of this report to be loaned out to students in future years.\\
+
+\noindent Signature:\\\\\\
+Alexandros Georgousis
+
+\clearpage
+
+\section*{Acknowledgements}
+I would like to thank Chris Buckley for his valuable insights and assistance with this project. I would also like to thank Martin Berger for his generous guidance during his time as my supervisor in the initial stages of the project, and his continuous support throughout its duration.
+
+\begin{abstract}
+Since the focus of AI research shifted from traditional programming approaches to Machine Learning, uninterpretability has been a big limitation of AI technologies. Recently, attempts have been made to incorporate some of these traditional approaches, such as Genetic Programming, into state-of-the-art AI research to tackle this problem. In this project, Genetic Programming is explored as a potential alternative to modern AI algorithms and is shown to produce interpretable solutions when applied directly to famous AI benchmark problems.
+\end{abstract}
+\clearpage
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\include{introduction}
+\include{professional_considerations}
+\include{background}
+\include{methods}
+\include{cartpole_mountaincar}
+\include{pendulum}
+\include{conclusion}
+
+\printbibliography
+
+\end{document}
